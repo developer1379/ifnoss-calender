@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject, OnInit, HostListener, effect } from '@angular/core';
+import { Component, computed, signal, inject, OnInit, OnDestroy, HostListener, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -700,7 +700,7 @@ const TOUR_STEPS: TourStep[] = [
     }
   `],
 })
-export class CalendarComponent implements OnInit {
+export class CalendarComponent implements OnInit, OnDestroy {
   days = DAYS;
   hours = HOURS;
 
@@ -716,21 +716,24 @@ export class CalendarComponent implements OnInit {
   });
   tourTooltipStyle = signal<{ top: string; left: string }>({ top: '0px', left: '0px' });
 
+  private tourInterval: any = null;
+
   @HostListener('window:resize')
   onWindowResize() {
     if (this.tourActive()) {
-      this.updateTourStep();
+      this.updateTourPosition();
     }
   }
 
   startTour() {
     this.tourStepIdx.set(0);
     this.tourActive.set(true);
-    this.updateTourStep();
+    this.startTourLoop();
   }
 
   skipTour() {
     this.tourActive.set(false);
+    this.stopTourLoop();
     localStorage.setItem('scheduler_tour_completed', 'true');
     this.snackBar.open('You can restart the tour anytime using the Tour Guide button.', 'Dismiss', { duration: 4000 });
   }
@@ -742,6 +745,7 @@ export class CalendarComponent implements OnInit {
       this.updateTourStep();
     } else {
       this.tourActive.set(false);
+      this.stopTourLoop();
       localStorage.setItem('scheduler_tour_completed', 'true');
       this.snackBar.open('Tour completed! You are ready to schedule.', 'Dismiss', { duration: 4000 });
     }
@@ -759,81 +763,119 @@ export class CalendarComponent implements OnInit {
     return TOUR_STEPS[this.tourStepIdx()];
   }
 
+  startTourLoop() {
+    this.stopTourLoop();
+    this.updateTourStep();
+    this.tourInterval = setInterval(() => {
+      if (this.tourActive()) {
+        this.updateTourPosition();
+      } else {
+        this.stopTourLoop();
+      }
+    }, 100);
+  }
+
+  stopTourLoop() {
+    if (this.tourInterval) {
+      clearInterval(this.tourInterval);
+      this.tourInterval = null;
+    }
+  }
+
   updateTourStep() {
     const idx = this.tourStepIdx();
     const step = TOUR_STEPS[idx];
-    
-    // Auto-scroll the target element into view if needed
     const el = document.getElementById(step.elementId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Wait for scroll to settle
-      setTimeout(() => {
-        const rect = el.getBoundingClientRect();
-        
-        // Spotlight rectangle styles
-        this.tourStyle.set({
-          top: `${rect.top - 6}px`,
-          left: `${rect.left - 6}px`,
-          width: `${rect.width + 12}px`,
-          height: `${rect.height + 12}px`,
-          display: 'block'
-        });
-        
-        // Tooltip balloon placement
-        let tooltipTop = 0;
-        let tooltipLeft = 0;
-        const offset = 20;
-        
-        const tooltipWidth = 320;
-        const tooltipHeight = 200;
-        
-        if (step.position === 'bottom') {
-          tooltipTop = rect.bottom + offset;
-          tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
-        } else if (step.position === 'top') {
-          tooltipTop = rect.top - tooltipHeight - offset;
-          tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
-        } else if (step.position === 'right') {
-          tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
-          tooltipLeft = rect.right + offset;
-        } else if (step.position === 'left') {
-          tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
-          tooltipLeft = rect.left - tooltipWidth - offset;
-        } else {
-          tooltipTop = window.innerHeight / 2 - tooltipHeight / 2;
-          tooltipLeft = window.innerWidth / 2 - tooltipWidth / 2;
-        }
-        
-        // Bound checks to keep tooltip inside viewport
-        if (tooltipLeft < 10) tooltipLeft = 10;
-        if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
-          tooltipLeft = window.innerWidth - tooltipWidth - 10;
-        }
-        if (tooltipTop < 10) tooltipTop = 10;
-        if (tooltipTop + tooltipHeight > window.innerHeight - 10) {
-          tooltipTop = window.innerHeight - tooltipHeight - 10;
-        }
-        
-        this.tourTooltipStyle.set({
-          top: `${tooltipTop}px`,
-          left: `${tooltipLeft}px`
-        });
-      }, 300);
-    } else {
-      this.tourStyle.set({
-        top: '0px',
-        left: '0px',
-        width: '0px',
-        height: '0px',
-        display: 'none'
-      });
-      this.tourTooltipStyle.set({
-        top: `${window.innerHeight / 2 - 100}px`,
-        left: `${window.innerWidth / 2 - 160}px`
-      });
     }
+    // Update position immediately and start/continue loop
+    this.updateTourPosition();
+  }
+
+  updateTourPosition() {
+    const idx = this.tourStepIdx();
+    if (idx < 0 || idx >= this.totalSteps) return;
+    const step = TOUR_STEPS[idx];
+    const el = document.getElementById(step.elementId);
+    
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      
+      // If element has zero size (e.g. not rendered/hidden), center the tooltip
+      if (rect.width === 0 || rect.height === 0) {
+        this.centerTooltip();
+        return;
+      }
+
+      // Spotlight rectangle styles
+      this.tourStyle.set({
+        top: `${rect.top - 6}px`,
+        left: `${rect.left - 6}px`,
+        width: `${rect.width + 12}px`,
+        height: `${rect.height + 12}px`,
+        display: 'block'
+      });
+      
+      // Tooltip balloon placement
+      let tooltipTop = 0;
+      let tooltipLeft = 0;
+      const offset = 20;
+      const tooltipWidth = 320;
+      const tooltipHeight = 200;
+      
+      if (step.position === 'bottom') {
+        tooltipTop = rect.bottom + offset;
+        tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+      } else if (step.position === 'top') {
+        tooltipTop = rect.top - tooltipHeight - offset;
+        tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+      } else if (step.position === 'right') {
+        tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+        tooltipLeft = rect.right + offset;
+      } else if (step.position === 'left') {
+        tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+        tooltipLeft = rect.left - tooltipWidth - offset;
+      } else {
+        tooltipTop = window.innerHeight / 2 - tooltipHeight / 2;
+        tooltipLeft = window.innerWidth / 2 - tooltipWidth / 2;
+      }
+      
+      // Bound checks to keep tooltip inside viewport
+      if (tooltipLeft < 10) tooltipLeft = 10;
+      if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
+        tooltipLeft = window.innerWidth - tooltipWidth - 10;
+      }
+      if (tooltipTop < 10) tooltipTop = 10;
+      if (tooltipTop + tooltipHeight > window.innerHeight - 10) {
+        tooltipTop = window.innerHeight - tooltipHeight - 10;
+      }
+      
+      this.tourTooltipStyle.set({
+        top: `${tooltipTop}px`,
+        left: `${tooltipLeft}px`
+      });
+    } else {
+      this.centerTooltip();
+    }
+  }
+
+  centerTooltip() {
+    this.tourStyle.set({
+      top: '0px',
+      left: '0px',
+      width: '0px',
+      height: '0px',
+      display: 'none'
+    });
+    this.tourTooltipStyle.set({
+      top: `${window.innerHeight / 2 - 100}px`,
+      left: `${window.innerWidth / 2 - 160}px`
+    });
+  }
+
+  ngOnDestroy() {
+    this.stopTourLoop();
   }
 
   readonly firstScheduledSession = computed(() => {
