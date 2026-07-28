@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject, OnInit } from '@angular/core';
+import { Component, computed, signal, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -547,6 +547,35 @@ export class CalendarComponent implements OnInit {
     return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
   });
 
+  isCtrlPressed = false;
+  isShiftPressed = false;
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Control') {
+      this.isCtrlPressed = true;
+    }
+    if (event.key === 'Shift') {
+      this.isShiftPressed = true;
+    }
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  onKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control') {
+      this.isCtrlPressed = false;
+    }
+    if (event.key === 'Shift') {
+      this.isShiftPressed = false;
+    }
+  }
+
+  @HostListener('window:blur')
+  onBlur() {
+    this.isCtrlPressed = false;
+    this.isShiftPressed = false;
+  }
+
   private readonly scheduleService = inject(ScheduleService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -607,10 +636,12 @@ export class CalendarComponent implements OnInit {
         if (overlaps.length === 0) {
           layouts[s.id] = { left: '4%', width: '92%' };
         } else {
-          // Sort the current session and all its overlaps by start time to assign horizontal columns
-          const allOverlapping = [s, ...overlaps].sort((a, b) =>
-            a.startTime!.localeCompare(b.startTime!)
-          );
+          // Sort the current session and all its overlaps by start time, then by ID to ensure stable columns
+          const allOverlapping = [s, ...overlaps].sort((a, b) => {
+            const timeDiff = a.startTime!.localeCompare(b.startTime!);
+            if (timeDiff !== 0) return timeDiff;
+            return a.id.localeCompare(b.id);
+          });
           const colIdx = allOverlapping.indexOf(s);
           const totalCols = allOverlapping.length;
           
@@ -977,24 +1008,43 @@ export class CalendarComponent implements OnInit {
         const endMins = startMins + duration;
         const newEndTime = this.minutesToTime(endMins);
 
-        const clashMsg = this.scheduleService.updateSession(session.id, {
-          courseId: session.courseId,
-          teacherId: session.teacherId,
-          roomId: session.roomId,
-          day: day,
-          startTime: hour,
-          endTime: newEndTime,
-        });
+        if (this.isCtrlPressed || this.isShiftPressed) {
+          // Copy session to new slot instead of relocating
+          const clashMsg = this.scheduleService.addSession({
+            courseId: session.courseId,
+            teacherId: session.teacherId,
+            roomId: session.roomId,
+            day: day,
+            startTime: hour,
+            endTime: newEndTime,
+          });
 
-        if (clashMsg) {
-          this.triggerClashNotification(clashMsg);
-        } else {
-          // Play capacity warning checks
-          const updatedSession = this.sessions().find(s => s.id === session.id);
-          if (updatedSession && this.hasCapacityWarning(updatedSession)) {
-            this.snackBar.open('Class moved, but seating capacity is insufficient.', 'Review', { duration: 4000 });
+          if (clashMsg) {
+            this.triggerClashNotification(clashMsg);
           } else {
-            this.snackBar.open('Class relocated successfully.', 'Dismiss', { duration: 3000 });
+            this.snackBar.open('Class copied successfully.', 'Dismiss', { duration: 3000 });
+          }
+        } else {
+          // Relocate existing
+          const clashMsg = this.scheduleService.updateSession(session.id, {
+            courseId: session.courseId,
+            teacherId: session.teacherId,
+            roomId: session.roomId,
+            day: day,
+            startTime: hour,
+            endTime: newEndTime,
+          });
+
+          if (clashMsg) {
+            this.triggerClashNotification(clashMsg);
+          } else {
+            // Play capacity warning checks
+            const updatedSession = this.sessions().find(s => s.id === session.id);
+            if (updatedSession && this.hasCapacityWarning(updatedSession)) {
+              this.snackBar.open('Class moved, but seating capacity is insufficient.', 'Review', { duration: 4000 });
+            } else {
+              this.snackBar.open('Class relocated successfully.', 'Dismiss', { duration: 3000 });
+            }
           }
         }
       } else {
@@ -1007,14 +1057,16 @@ export class CalendarComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((res) => {
           if (res) {
-            // Delete draft pool item
-            this.scheduleService.deleteSession(session.id);
+            // Delete draft pool item if not copying
+            if (!(this.isCtrlPressed || this.isShiftPressed)) {
+              this.scheduleService.deleteSession(session.id);
+            }
             // Insert scheduled session card
             const clashMsg = this.scheduleService.addSession(res);
             if (clashMsg) {
               this.triggerClashNotification(clashMsg);
             } else {
-              this.snackBar.open('Session scheduled successfully.', 'Dismiss', { duration: 3000 });
+              this.snackBar.open(this.isCtrlPressed || this.isShiftPressed ? 'Session copied and scheduled successfully.' : 'Session scheduled successfully.', 'Dismiss', { duration: 3000 });
             }
           }
         });
