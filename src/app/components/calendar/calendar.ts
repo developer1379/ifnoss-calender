@@ -603,58 +603,57 @@ const TOUR_STEPS: TourStep[] = [
         </div>
       </div>
 
-      <!-- Tour Guide Overlay Backdrop & Spotlight -->
-      <div *ngIf="tourActive()" class="fixed inset-0 z-[100] pointer-events-none select-none overflow-hidden">
-        <!-- Spotlight highlight ring -->
-        <div
-          [style.top]="tourStyle().top"
-          [style.left]="tourStyle().left"
-          [style.width]="tourStyle().width"
-          [style.height]="tourStyle().height"
-          [style.display]="tourStyle().display"
-          class="fixed rounded-2xl border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] pointer-events-auto tour-spotlight-box"
-        ></div>
+      <!-- Tour Guide Overlay Backdrop (Spotlight Ring) -->
+      <div
+        *ngIf="tourActive()"
+        [style.top]="tourStyle().top"
+        [style.left]="tourStyle().left"
+        [style.width]="tourStyle().width"
+        [style.height]="tourStyle().height"
+        [style.display]="tourStyle().display"
+        class="fixed rounded-2xl border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] pointer-events-none select-none z-[100] tour-spotlight-box"
+      ></div>
+      
+      <!-- Tour Guide Tooltip Card -->
+      <div
+        *ngIf="tourActive()"
+        [style.top]="tourTooltipStyle().top"
+        [style.left]="tourTooltipStyle().left"
+        class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl z-[101] flex flex-col gap-4 w-[320px] pointer-events-auto select-none"
+      >
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <span class="text-xs font-black text-slate-800 tracking-tight">{{ getActiveStep().title }}</span>
+          <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-mono">
+            {{ tourStepIdx() + 1 }} of {{ totalSteps }}
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-650 leading-relaxed font-semibold">
+          {{ getActiveStep().description }}
+        </p>
         
-        <!-- Tooltip Card -->
-        <div
-          [style.top]="tourTooltipStyle().top"
-          [style.left]="tourTooltipStyle().left"
-          class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl z-[101] flex flex-col gap-4 w-[320px] pointer-events-auto select-none"
-        >
-          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-            <span class="text-xs font-black text-slate-800 tracking-tight">{{ getActiveStep().title }}</span>
-            <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-mono">
-              {{ tourStepIdx() + 1 }} of {{ totalSteps }}
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-650 leading-relaxed font-semibold">
-            {{ getActiveStep().description }}
-          </p>
-          
-          <!-- Progress Bar -->
-          <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-            <div class="bg-blue-600 h-1.5 transition-all duration-300" [style.width.%]="((tourStepIdx() + 1) / totalSteps) * 100"></div>
-          </div>
-          
-          <div class="flex justify-between items-center mt-1 pt-3 border-t border-slate-100">
-            <button (click)="skipTour()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition cursor-pointer">
-              Skip Tour
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div class="bg-blue-600 h-1.5 transition-all duration-300" [style.width.%]="((tourStepIdx() + 1) / totalSteps) * 100"></div>
+        </div>
+        
+        <div class="flex justify-between items-center mt-1 pt-3 border-t border-slate-100">
+          <button (click)="skipTour()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition cursor-pointer">
+            Skip Tour
+          </button>
+          <div class="flex gap-2">
+            <button
+              *ngIf="tourStepIdx() > 0"
+              (click)="prevTourStep()"
+              class="text-[10px] border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-1.5 rounded-lg transition cursor-pointer"
+            >
+              Back
             </button>
-            <div class="flex gap-2">
-              <button
-                *ngIf="tourStepIdx() > 0"
-                (click)="prevTourStep()"
-                class="text-[10px] border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-1.5 rounded-lg transition cursor-pointer"
-              >
-                Back
-              </button>
-              <button
-                (click)="nextTourStep()"
-                class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition cursor-pointer"
-              >
-                {{ tourStepIdx() === totalSteps - 1 ? 'Finish' : 'Next' }}
-              </button>
-            </div>
+            <button
+              (click)="nextTourStep()"
+              class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition cursor-pointer"
+            >
+              {{ tourStepIdx() === totalSteps - 1 ? 'Finish' : 'Next' }}
+            </button>
           </div>
         </div>
       </div>
