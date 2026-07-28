@@ -348,6 +348,7 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
                   [style.background]="getGlossyBg(session.teacherId)"
                   [style.border-color]="getGlossyBorder(session.teacherId)"
                   (click)="openScheduleDialog(session); $event.stopPropagation()"
+                  (contextmenu)="onCardContextMenu($event, session); $event.stopPropagation()"
                   [style.left]="getSessionLayout(session).left"
                   [style.width]="getSessionLayout(session).width"
                   class="absolute rounded-xl p-2.5 text-xs select-none cursor-grab active:cursor-grabbing overflow-hidden transition-all border-l-4 border-slate-200 shadow-sm hover:shadow-md z-20 flex flex-col justify-between group backdrop-blur-md"
@@ -453,6 +454,98 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
         </div>
 
       </div>
+
+      <!-- Custom Premium Context Menu -->
+      <div
+        *ngIf="contextMenuVisible() && contextMenuSession() as session"
+        [style.left.px]="contextMenuPosition().x"
+        [style.top.px]="contextMenuPosition().y"
+        class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 min-w-[260px] max-w-[320px] select-none text-slate-800 transition-all scale-95 duration-100 animate-in fade-in zoom-in-95"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Session Header Info -->
+        <div class="flex flex-col gap-1 border-b border-slate-100 pb-2.5">
+          <div class="flex items-center gap-1.5 justify-between">
+            <span class="text-[9px] font-black bg-indigo-50 text-indigo-700 border border-indigo-100/60 px-2 py-0.5 rounded-md font-mono">
+              {{ getCourseCode(session.courseId) }}
+            </span>
+            <span class="text-[8px] font-bold text-slate-400 font-mono">{{ session.startTime }} - {{ session.endTime }}</span>
+          </div>
+          <div class="text-xs font-black text-slate-800 leading-snug mt-1 truncate">{{ getCourseName(session.courseId) }}</div>
+        </div>
+
+        <!-- Detail rows -->
+        <div class="flex flex-col gap-2 text-[10px] text-slate-650 bg-slate-50/70 border border-slate-100/40 p-2.5 rounded-xl">
+          <div class="flex items-center gap-2">
+            <div class="w-5 h-5 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <img *ngIf="getTeacherAvatar(session.teacherId)" [src]="getTeacherAvatar(session.teacherId)" class="w-full h-full object-cover" />
+              <span *ngIf="!getTeacherAvatar(session.teacherId)" class="text-[7px] font-extrabold" [style.color]="getTeacherColor(session.teacherId)">
+                {{ getTeacherInitials(session.teacherId) }}
+              </span>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-[8px] text-slate-400 font-bold leading-none uppercase">Teacher</span>
+              <span class="font-bold text-slate-700 mt-0.5 truncate">{{ getTeacherName(session.teacherId) }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div [style.background-color]="getTeacherColor(session.teacherId) + '15'" class="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0">
+              <mat-icon class="text-xs w-3 h-3 flex items-center justify-center" [style.color]="getTeacherColor(session.teacherId)">room</mat-icon>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-[8px] text-slate-400 font-bold leading-none uppercase">Classroom</span>
+              <span class="font-bold text-slate-700 mt-0.5 truncate">{{ getRoomName(session.roomId!) }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div [style.background-color]="getTeacherColor(session.teacherId) + '15'" class="w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center">
+              <mat-icon class="text-xs w-3 h-3 flex items-center justify-center" [style.color]="getTeacherColor(session.teacherId)">today</mat-icon>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-[8px] text-slate-400 font-bold leading-none uppercase">Day</span>
+              <span class="font-bold text-slate-700 mt-0.5 truncate">{{ session.day }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action items list -->
+        <div class="flex flex-col gap-1 border-t border-slate-100 pt-2">
+          <button
+            (click)="contextEdit(session)"
+            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 p-2 rounded-lg transition duration-150 cursor-pointer"
+          >
+            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center text-slate-455">edit</mat-icon>
+            <span>Edit Class Settings</span>
+          </button>
+
+          <button
+            (click)="contextCopy(session)"
+            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-slate-700 hover:text-indigo-650 hover:bg-indigo-50/50 p-2 rounded-lg transition duration-150 cursor-pointer"
+          >
+            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center text-slate-455">content_copy</mat-icon>
+            <span>Duplicate Class</span>
+          </button>
+
+          <button
+            (click)="contextUnschedule(session)"
+            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-slate-700 hover:text-emerald-650 hover:bg-emerald-50/50 p-2 rounded-lg transition duration-150 cursor-pointer"
+          >
+            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center text-slate-455">archive</mat-icon>
+            <span>Move to Drafts</span>
+          </button>
+
+          <button
+            (click)="contextDelete(session)"
+            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-red-650 hover:bg-red-50 p-2 rounded-lg transition duration-150 cursor-pointer"
+          >
+            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center">delete</mat-icon>
+            <span>Delete Session</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   `,
   styles: [`
@@ -574,6 +667,89 @@ export class CalendarComponent implements OnInit {
   onBlur() {
     this.isCtrlPressed = false;
     this.isShiftPressed = false;
+  }
+
+  contextMenuVisible = signal(false);
+  contextMenuPosition = signal({ x: 0, y: 0 });
+  contextMenuSession = signal<ScheduleSession | null>(null);
+
+  @HostListener('window:click')
+  closeContextMenu() {
+    this.contextMenuVisible.set(false);
+  }
+
+  @HostListener('window:contextmenu')
+  closeContextMenuOnRightClick() {
+    this.contextMenuVisible.set(false);
+  }
+
+  onCardContextMenu(event: MouseEvent, session: ScheduleSession) {
+    event.preventDefault();
+    this.contextMenuSession.set(session);
+    
+    let x = event.clientX;
+    let y = event.clientY;
+    
+    const menuWidth = 280;
+    const menuHeight = 320;
+    
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 10;
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 10;
+    }
+    
+    this.contextMenuPosition.set({ x, y });
+    this.contextMenuVisible.set(true);
+  }
+
+  contextEdit(session: ScheduleSession) {
+    this.closeContextMenu();
+    this.openScheduleDialog(session);
+  }
+
+  contextCopy(session: ScheduleSession) {
+    this.closeContextMenu();
+    const clashMsg = this.scheduleService.addSession({
+      courseId: session.courseId,
+      teacherId: session.teacherId,
+      roomId: session.roomId,
+      day: session.day,
+      startTime: session.startTime,
+      endTime: session.endTime,
+    });
+    if (clashMsg) {
+      this.triggerClashNotification(clashMsg);
+    } else {
+      this.snackBar.open('Class duplicated successfully.', 'Dismiss', { duration: 3000 });
+    }
+  }
+
+  contextUnschedule(session: ScheduleSession) {
+    this.closeContextMenu();
+    this.scheduleService.moveSession(session.id, null, null, null, null);
+    this.snackBar.open(`"${this.getCourseCode(session.courseId)}" moved to Unscheduled Drafts.`, 'Dismiss', { duration: 3000 });
+  }
+
+  contextDelete(session: ScheduleSession) {
+    this.closeContextMenu();
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '360px',
+      data: {
+        title: 'Delete Class Session',
+        message: 'Are you sure you want to delete this scheduled class session?',
+        confirmText: 'Delete',
+        confirmBg: '#DC2626'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.scheduleService.deleteSession(session.id);
+        this.snackBar.open('Session deleted.', 'Dismiss', { duration: 3000 });
+      }
+    });
   }
 
   private readonly scheduleService = inject(ScheduleService);
