@@ -619,7 +619,8 @@ const TOUR_STEPS: TourStep[] = [
         *ngIf="tourActive()"
         [style.top]="tourTooltipStyle().top"
         [style.left]="tourTooltipStyle().left"
-        class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl z-[101] flex flex-col gap-4 w-[320px] pointer-events-auto select-none"
+        style="pointer-events: auto !important; z-index: 99999 !important;"
+        class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl flex flex-col gap-4 w-[320px] select-none"
       >
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <span class="text-xs font-black text-slate-800 tracking-tight">{{ getActiveStep().title }}</span>
@@ -637,20 +638,22 @@ const TOUR_STEPS: TourStep[] = [
         </div>
         
         <div class="flex justify-between items-center mt-1 pt-3 border-t border-slate-100">
-          <button (click)="skipTour()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition cursor-pointer">
+          <button (click)="skipTour()" style="pointer-events: auto !important; cursor: pointer !important;" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition">
             Skip Tour
           </button>
           <div class="flex gap-2">
             <button
               *ngIf="tourStepIdx() > 0"
               (click)="prevTourStep()"
-              class="text-[10px] border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-1.5 rounded-lg transition cursor-pointer"
+              style="pointer-events: auto !important; cursor: pointer !important;"
+              class="text-[10px] border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-1.5 rounded-lg transition"
             >
               Back
             </button>
             <button
               (click)="nextTourStep()"
-              class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition cursor-pointer"
+              style="pointer-events: auto !important; cursor: pointer !important;"
+              class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition"
             >
               {{ tourStepIdx() === totalSteps - 1 ? 'Finish' : 'Next' }}
             </button>
