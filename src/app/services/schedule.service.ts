@@ -1,4 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 
 export interface Teacher {
   id: string;
@@ -53,6 +55,9 @@ export interface CapacityWarning {
   providedIn: 'root',
 })
 export class ScheduleService {
+  private readonly http = inject(HttpClient);
+  private readonly API_BASE = 'https://blueviolet-pony-257143.hostingersite.com';
+
   // Signals for state
   private readonly teachersSignal = signal<Teacher[]>([]);
   private readonly coursesSignal = signal<Course[]>([]);
@@ -159,75 +164,25 @@ export class ScheduleService {
     this.loadInitialData();
   }
 
-  // Load from localStorage or set mock data
   private loadInitialData() {
-    const storedTeachers = localStorage.getItem('scheduler_teachers');
-    const storedCourses = localStorage.getItem('scheduler_courses');
-    const storedRooms = localStorage.getItem('scheduler_rooms');
-    const storedSessions = localStorage.getItem('scheduler_sessions');
-
-    if (storedTeachers && storedCourses && storedRooms && storedSessions) {
-      this.teachersSignal.set(JSON.parse(storedTeachers));
-      this.coursesSignal.set(JSON.parse(storedCourses));
-      this.roomsSignal.set(JSON.parse(storedRooms));
-      this.sessionsSignal.set(JSON.parse(storedSessions));
-    } else {
-      this.loadMockData();
-    }
+    forkJoin({
+      teachers: this.http.get<Teacher[]>(`${this.API_BASE}/api/teachers`),
+      courses: this.http.get<Course[]>(`${this.API_BASE}/api/courses`),
+      rooms: this.http.get<Room[]>(`${this.API_BASE}/api/rooms`),
+      sessions: this.http.get<ScheduleSession[]>(`${this.API_BASE}/api/sessions`)
+    }).subscribe({
+      next: (data) => {
+        this.teachersSignal.set(data.teachers);
+        this.coursesSignal.set(data.courses);
+        this.roomsSignal.set(data.rooms);
+        this.sessionsSignal.set(data.sessions);
+      },
+      error: (err) => {
+        console.error('Error loading initial schedule data:', err);
+      }
+    });
   }
 
-  private saveToLocalStorage() {
-    localStorage.setItem('scheduler_teachers', JSON.stringify(this.teachersSignal()));
-    localStorage.setItem('scheduler_courses', JSON.stringify(this.coursesSignal()));
-    localStorage.setItem('scheduler_rooms', JSON.stringify(this.roomsSignal()));
-    localStorage.setItem('scheduler_sessions', JSON.stringify(this.sessionsSignal()));
-  }
-
-  private loadMockData() {
-    // Professional bright swatches for light mode borders
-    const mockTeachers: Teacher[] = [
-      { id: 't1', name: 'Dr. Sarah Connor', email: 's.connor@university.edu', department: 'Computer Science', color: '#1a73e8', availability: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150' }, 
-      { id: 't2', name: 'Prof. Alan Turing', email: 'a.turing@university.edu', department: 'Mathematics', color: '#0f9d58', availability: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' }, 
-      { id: 't3', name: 'Dr. Marie Curie', email: 'm.curie@university.edu', department: 'Physics', color: '#f4b400', availability: ['Monday', 'Wednesday', 'Friday'], avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150' }, 
-      { id: 't4', name: 'Prof. Richard Feynman', email: 'r.feynman@university.edu', department: 'Physics', color: '#db4437', availability: ['Tuesday', 'Thursday', 'Friday'], avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' }, 
-    ];
-
-    const mockCourses: Course[] = [
-      { id: 'c1', code: 'CS-101', name: 'Introduction to Programming', department: 'Computer Science', enrolledStudents: 130 }, // High students count for capacity warnings
-      { id: 'c2', code: 'MATH-201', name: 'Linear Algebra', department: 'Mathematics', enrolledStudents: 25 },
-      { id: 'c3', code: 'PHY-301', name: 'Quantum Mechanics', department: 'Physics', enrolledStudents: 15 },
-      { id: 'c4', code: 'CS-202', name: 'Data Structures & Algorithms', department: 'Computer Science', enrolledStudents: 40 },
-    ];
-
-    const mockRooms: Room[] = [
-      { id: 'r1', name: 'Lecture Hall 101', capacity: 120, type: 'Lecture Hall' }, // Will clash with CS-101 (130 students)
-      { id: 'r2', name: 'Seminar Room 202', capacity: 30, type: 'Seminar Room' },
-      { id: 'r3', name: 'Computing Lab A', capacity: 45, type: 'Lab' },
-    ];
-
-    const mockSessions: ScheduleSession[] = [
-      // Normal scheduled sessions
-      { id: 's_1', teacherId: 't1', courseId: 'c1', roomId: 'r1', day: 'Monday', startTime: '09:00', endTime: '10:30' },
-      { id: 's_2', teacherId: 't2', courseId: 'c2', roomId: 'r2', day: 'Tuesday', startTime: '11:00', endTime: '12:30' },
-      { id: 's_3', teacherId: 't4', courseId: 'c4', roomId: 'r3', day: 'Tuesday', startTime: '14:00', endTime: '15:30' },
-
-      // INTENTIONAL CONFLICTS
-      // Conflict 1: Room clash in Lecture Hall 101 (Monday 09:30 - 11:00 overlaps with s_1)
-      { id: 's_4', teacherId: 't3', courseId: 'c3', roomId: 'r1', day: 'Monday', startTime: '09:30', endTime: '11:00' },
-      // Conflict 2: Teacher clash for Prof. Turing (Tuesday 11:30 - 13:00 overlaps with s_2)
-      { id: 's_5', teacherId: 't2', courseId: 'c1', roomId: 'r3', day: 'Tuesday', startTime: '11:30', endTime: '13:00' },
-
-      // Unscheduled drafts in the sidebar pool
-      { id: 'd_1', teacherId: 't1', courseId: 'c4', roomId: null, day: null, startTime: null, endTime: null },
-      { id: 'd_2', teacherId: 't3', courseId: 'c3', roomId: null, day: null, startTime: null, endTime: null }
-    ];
-
-    this.teachersSignal.set(mockTeachers);
-    this.coursesSignal.set(mockCourses);
-    this.roomsSignal.set(mockRooms);
-    this.sessionsSignal.set(mockSessions);
-    this.saveToLocalStorage();
-  }
 
   // --- Helpers for naming ---
   getTeacherName(id: string): string {
@@ -266,78 +221,129 @@ export class ScheduleService {
 
   // --- Teacher CRUD ---
   addTeacher(teacher: Omit<Teacher, 'id'>) {
-    const newTeacher = { ...teacher, id: 'teacher_' + Date.now() };
-    this.teachersSignal.update((list) => [...list, newTeacher]);
-    this.saveToLocalStorage();
+    const newId = 'teacher_' + Date.now();
+    const newTeacher = { ...teacher, id: newId };
+    
+    this.http.post(`${this.API_BASE}/api/teachers`, newTeacher).subscribe({
+      next: () => {
+        this.teachersSignal.update((list) => [...list, newTeacher]);
+      },
+      error: (err) => console.error('Error adding teacher:', err)
+    });
   }
 
   updateTeacher(id: string, updated: Omit<Teacher, 'id'>) {
-    this.teachersSignal.update((list) =>
-      list.map((t) => (t.id === id ? { ...updated, id } : t))
-    );
-    this.saveToLocalStorage();
+    const updatedTeacher = { ...updated, id };
+    
+    this.http.put(`${this.API_BASE}/api/teachers/${id}`, updatedTeacher).subscribe({
+      next: () => {
+        this.teachersSignal.update((list) =>
+          list.map((t) => (t.id === id ? updatedTeacher : t))
+        );
+      },
+      error: (err) => console.error('Error updating teacher:', err)
+    });
   }
 
   deleteTeacher(id: string) {
-    this.teachersSignal.update((list) => list.filter((t) => t.id !== id));
-    // Cascade delete sessions
-    this.sessionsSignal.update((list) => list.filter((s) => s.teacherId !== id));
-    this.saveToLocalStorage();
+    this.http.delete(`${this.API_BASE}/api/teachers/${id}`).subscribe({
+      next: () => {
+        this.teachersSignal.update((list) => list.filter((t) => t.id !== id));
+        this.sessionsSignal.update((list) => list.filter((s) => s.teacherId !== id));
+      },
+      error: (err) => console.error('Error deleting teacher:', err)
+    });
   }
 
   // --- Course CRUD ---
   addCourse(course: Omit<Course, 'id'>) {
-    const newCourse = { ...course, id: 'course_' + Date.now() };
-    this.coursesSignal.update((list) => [...list, newCourse]);
-    this.saveToLocalStorage();
+    const newId = 'course_' + Date.now();
+    const newCourse = { ...course, id: newId };
+    
+    this.http.post(`${this.API_BASE}/api/courses`, newCourse).subscribe({
+      next: () => {
+        this.coursesSignal.update((list) => [...list, newCourse]);
+      },
+      error: (err) => console.error('Error adding course:', err)
+    });
   }
 
   updateCourse(id: string, updated: Omit<Course, 'id'>) {
-    this.coursesSignal.update((list) =>
-      list.map((c) => (c.id === id ? { ...updated, id } : c))
-    );
-    this.saveToLocalStorage();
+    const updatedCourse = { ...updated, id };
+    
+    this.http.put(`${this.API_BASE}/api/courses/${id}`, updatedCourse).subscribe({
+      next: () => {
+        this.coursesSignal.update((list) =>
+          list.map((c) => (c.id === id ? updatedCourse : c))
+        );
+      },
+      error: (err) => console.error('Error updating course:', err)
+    });
   }
 
   deleteCourse(id: string) {
-    this.coursesSignal.update((list) => list.filter((c) => c.id !== id));
-    // Cascade delete sessions
-    this.sessionsSignal.update((list) => list.filter((s) => s.courseId !== id));
-    this.saveToLocalStorage();
+    this.http.delete(`${this.API_BASE}/api/courses/${id}`).subscribe({
+      next: () => {
+        this.coursesSignal.update((list) => list.filter((c) => c.id !== id));
+        this.sessionsSignal.update((list) => list.filter((s) => s.courseId !== id));
+      },
+      error: (err) => console.error('Error deleting course:', err)
+    });
   }
 
   // --- Room CRUD ---
   addRoom(room: Omit<Room, 'id'>) {
-    const newRoom = { ...room, id: 'room_' + Date.now() };
-    this.roomsSignal.update((list) => [...list, newRoom]);
-    this.saveToLocalStorage();
+    const newId = 'room_' + Date.now();
+    const newRoom = { ...room, id: newId };
+    
+    this.http.post(`${this.API_BASE}/api/rooms`, newRoom).subscribe({
+      next: () => {
+        this.roomsSignal.update((list) => [...list, newRoom]);
+      },
+      error: (err) => console.error('Error adding room:', err)
+    });
   }
 
   updateRoom(id: string, updated: Omit<Room, 'id'>) {
-    this.roomsSignal.update((list) =>
-      list.map((r) => (r.id === id ? { ...updated, id } : r))
-    );
-    this.saveToLocalStorage();
+    const updatedRoom = { ...updated, id };
+    
+    this.http.put(`${this.API_BASE}/api/rooms/${id}`, updatedRoom).subscribe({
+      next: () => {
+        this.roomsSignal.update((list) =>
+          list.map((r) => (r.id === id ? updatedRoom : r))
+        );
+      },
+      error: (err) => console.error('Error updating room:', err)
+    });
   }
 
   deleteRoom(id: string) {
-    this.roomsSignal.update((list) => list.filter((r) => r.id !== id));
-    // Cascade un-schedule sessions associated with this room (moving back to drafts)
-    this.sessionsSignal.update((list) =>
-      list.map((s) => (s.roomId === id ? { ...s, roomId: null, day: null, startTime: null, endTime: null } : s))
-    );
-    this.saveToLocalStorage();
+    this.http.delete(`${this.API_BASE}/api/rooms/${id}`).subscribe({
+      next: () => {
+        this.roomsSignal.update((list) => list.filter((r) => r.id !== id));
+        this.sessionsSignal.update((list) =>
+          list.map((s) => (s.roomId === id ? { ...s, roomId: null, day: null, startTime: null, endTime: null } : s))
+        );
+      },
+      error: (err) => console.error('Error deleting room:', err)
+    });
   }
 
   // --- Session CRUD ---
   addSession(session: Omit<ScheduleSession, 'id'>): string | null {
-    const newSession = { ...session, id: 'session_' + Date.now() };
-    this.sessionsSignal.update((list) => [...list, newSession]);
-    this.saveToLocalStorage();
+    const newId = 'session_' + Date.now();
+    const newSession = { ...session, id: newId };
+    
+    this.http.post(`${this.API_BASE}/api/sessions`, newSession).subscribe({
+      next: () => {
+        this.sessionsSignal.update((list) => [...list, newSession]);
+      },
+      error: (err) => console.error('Error adding session:', err)
+    });
 
     // Check if the newly added session created any conflicts
     const recentConflicts = this.conflicts().filter(
-      (c) => c.session1.id === newSession.id || c.session2.id === newSession.id
+      (c) => c.session1.id === newId || c.session2.id === newId
     );
     if (recentConflicts.length > 0) {
       return recentConflicts[0].description;
@@ -346,10 +352,16 @@ export class ScheduleService {
   }
 
   updateSession(id: string, updated: Omit<ScheduleSession, 'id'>): string | null {
-    this.sessionsSignal.update((list) =>
-      list.map((s) => (s.id === id ? { ...updated, id } : s))
-    );
-    this.saveToLocalStorage();
+    const updatedSession = { ...updated, id };
+    
+    this.http.put(`${this.API_BASE}/api/sessions/${id}`, updatedSession).subscribe({
+      next: () => {
+        this.sessionsSignal.update((list) =>
+          list.map((s) => (s.id === id ? updatedSession : s))
+        );
+      },
+      error: (err) => console.error('Error updating session:', err)
+    });
 
     const recentConflicts = this.conflicts().filter(
       (c) => c.session1.id === id || c.session2.id === id
@@ -361,8 +373,12 @@ export class ScheduleService {
   }
 
   deleteSession(id: string) {
-    this.sessionsSignal.update((list) => list.filter((s) => s.id !== id));
-    this.saveToLocalStorage();
+    this.http.delete(`${this.API_BASE}/api/sessions/${id}`).subscribe({
+      next: () => {
+        this.sessionsSignal.update((list) => list.filter((s) => s.id !== id));
+      },
+      error: (err) => console.error('Error deleting session:', err)
+    });
   }
 
   // Move a session between scheduled timeslots or drafts
@@ -370,6 +386,12 @@ export class ScheduleService {
     this.sessionsSignal.update((list) =>
       list.map((s) => (s.id === id ? { ...s, day, startTime, endTime, roomId } : s))
     );
-    this.saveToLocalStorage();
+    
+    const existingSession = this.sessionsSignal().find((s) => s.id === id);
+    if (existingSession) {
+      this.http.put(`${this.API_BASE}/api/sessions/${id}`, existingSession).subscribe({
+        error: (err) => console.error('Error moving session:', err)
+      });
+    }
   }
 }
