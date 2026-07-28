@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 
@@ -160,8 +161,12 @@ export class ScheduleService {
     return result;
   });
 
+  private readonly platformId = inject(PLATFORM_ID);
+
   constructor() {
-    this.loadInitialData();
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadInitialData();
+    }
   }
 
   private loadInitialData() {
