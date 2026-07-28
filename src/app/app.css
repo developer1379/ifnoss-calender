@@ -1,0 +1,70 @@
+/* Style overrides for Angular Material Tabs in light theme */
+::ng-deep .theme-light-tabs {
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04) !important;
+}
+
+::ng-deep .theme-light-tabs .mat-mdc-tab-header {
+  border-bottom: 1px solid #F1F5F9 !important;
+  background-color: #F8FAFC !important; /* bg-slate-50 */
+  padding: 6px 12px !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Hide standard MDC bottom active line */
+::ng-deep .theme-light-tabs .mat-mdc-tab-group-header-non-aligned-accent-bar,
+::ng-deep .theme-light-tabs .mdc-tab-indicator__content--activated {
+  display: none !important;
+}
+
+::ng-deep .theme-light-tabs .mat-mdc-tab {
+  border-radius: 8px !important;
+  margin: 2px 4px !important;
+  min-width: auto !important;
+  height: 38px !important;
+  padding: 0 16px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Hover state */
+::ng-deep .theme-light-tabs .mat-mdc-tab:hover {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Active tab state - soft card container */
+::ng-deep .theme-light-tabs .mat-mdc-tab.mdc-tab--active {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid rgba(226, 232, 240, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Inactive text */
+::ng-deep .theme-light-tabs .mat-mdc-tab .mdc-tab__text-label {
+  color: #64748B !important; /* slate-500 */
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.025em !important;
+}
+
+/* Active text */
+::ng-deep .theme-light-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #1a73e8 !important; /* active tab text color is Google Blue */
+  font-weight: 800 !important;
+}
+
+/* Inactive icons */
+::ng-deep .theme-light-tabs .mat-mdc-tab mat-icon {
+  color: #94A3B8 !important; /* slate-400 */
+  transition: color 0.2s ease !important;
+}
+
+/* Active icons */
+::ng-deep .theme-light-tabs .mat-mdc-tab.mdc-tab--active mat-icon {
+  color: #1a73e8 !important; /* Google Blue active icon */
+}
+
+::ng-deep .theme-light-tabs .mat-mdc-tab-body-wrapper {
+  background: transparent !important;
+  padding-top: 8px !important;
+}

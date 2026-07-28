@@ -1,12 +1,25 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
+import { CalendarComponent } from './components/calendar/calendar';
+import { TeachersComponent } from './components/teachers/teachers';
+import { CoursesComponent } from './components/courses/courses';
+import { RoomsComponent } from './components/rooms/rooms';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTabsModule,
+    MatIconModule,
+    CalendarComponent,
+    TeachersComponent,
+    CoursesComponent,
+    RoomsComponent,
+  ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App {
-  protected readonly title = signal('ifnoss-calender');
-}
+export class App {}
