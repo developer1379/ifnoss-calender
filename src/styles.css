@@ -74,3 +74,14 @@ html, body {
 .cdk-drop-list-dragging .cdk-drag {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+/* Material Dialog Surface Reset */
+.cdk-overlay-pane {
+  max-width: 90vw !important;
+}
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 16px !important;
+  background-color: #FFFFFF !important;
+  padding: 0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}

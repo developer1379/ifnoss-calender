@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ScheduleService, Course } from '../../services/schedule.service';
-import { CourseDialog } from '../dialogs';
+import { CourseDialog, ConfirmDialog } from '../dialogs';
 
 @Component({
   selector: 'app-courses',
@@ -169,9 +169,21 @@ export class CoursesComponent {
   }
 
   deleteCourse(course: Course) {
-    if (confirm(`Are you sure you want to delete ${course.name} (${course.code})? This will delete all calendar classes scheduled for this course.`)) {
-      this.scheduleService.deleteCourse(course.id);
-      this.snackBar.open('Course and its schedule slots deleted.', 'Dismiss', { duration: 3000 });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '360px',
+      data: {
+        title: 'Delete Course',
+        message: `Are you sure you want to delete ${course.name} (${course.code})? This will delete all calendar classes scheduled for this course.`,
+        confirmText: 'Delete',
+        confirmBg: '#DC2626'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.scheduleService.deleteCourse(course.id);
+        this.snackBar.open('Course and its schedule slots deleted.', 'Dismiss', { duration: 3000 });
+      }
+    });
   }
 }

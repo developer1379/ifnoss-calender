@@ -630,3 +630,68 @@ export class ScheduleDialog implements OnInit {
     this.dialogRef.close();
   }
 }
+
+// ==========================================
+// 5. CONFIRM DIALOG
+// ==========================================
+@Component({
+  selector: 'app-confirm-dialog',
+  standalone: true,
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  template: `
+    <div class="p-5 max-w-sm w-full bg-white rounded-2xl shadow-xl border border-slate-100 flex flex-col gap-4 select-none">
+      <!-- Header: Title and Icon -->
+      <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+        <div [style.background-color]="(data.confirmBg || '#DC2626') + '15'" class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+          <mat-icon [style.color]="data.confirmBg || '#DC2626'" class="text-base w-4.5 h-4.5 flex items-center justify-center">{{ data.icon || 'warning' }}</mat-icon>
+        </div>
+        <h2 class="text-xs font-black text-slate-805 tracking-tight leading-none">{{ data.title || 'Confirm Action' }}</h2>
+      </div>
+      
+      <!-- Message Content -->
+      <p class="text-[11px] font-semibold text-slate-500 leading-relaxed py-0.5">
+        {{ data.message }}
+      </p>
+
+      <!-- Footer Actions -->
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button
+          (click)="onCancel()"
+          class="text-[10px] font-extrabold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 px-3.5 py-2 rounded-lg cursor-pointer transition-colors"
+        >
+          {{ data.cancelText || 'Cancel' }}
+        </button>
+        <button
+          (click)="onConfirm()"
+          [style.background-color]="data.confirmBg || '#DC2626'"
+          class="text-[10px] font-extrabold text-white px-4 py-2 rounded-lg cursor-pointer hover:brightness-95 active:brightness-90 transition-all shadow-sm border border-transparent"
+          style="color: white !important;"
+        >
+          {{ data.confirmText || 'Confirm' }}
+        </button>
+      </div>
+    </div>
+  `
+})
+export class ConfirmDialog {
+  constructor(
+    private dialogRef: MatDialogRef<ConfirmDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: {
+      title?: string;
+      message: string;
+      icon?: string;
+      titleColor?: string;
+      confirmBg?: string;
+      confirmText?: string;
+      cancelText?: string;
+    }
+  ) {}
+
+  onCancel() {
+    this.dialogRef.close(false);
+  }
+
+  onConfirm() {
+    this.dialogRef.close(true);
+  }
+}

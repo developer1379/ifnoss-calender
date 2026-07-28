@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ScheduleService, Room } from '../../services/schedule.service';
-import { RoomDialog } from '../dialogs';
+import { RoomDialog, ConfirmDialog } from '../dialogs';
 
 @Component({
   selector: 'app-rooms',
@@ -175,9 +175,21 @@ export class RoomsComponent {
   }
 
   deleteRoom(room: Room) {
-    if (confirm(`Are you sure you want to delete ${room.name}? This will move all classes scheduled in this classroom back to the drafts pool.`)) {
-      this.scheduleService.deleteRoom(room.id);
-      this.snackBar.open('Classroom deleted. Scheduled sessions moved back to drafts.', 'Dismiss', { duration: 3000 });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '360px',
+      data: {
+        title: 'Delete Classroom',
+        message: `Are you sure you want to delete ${room.name}? This will move all classes scheduled in this classroom back to the unscheduled drafts pool.`,
+        confirmText: 'Delete',
+        confirmBg: '#DC2626'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.scheduleService.deleteRoom(room.id);
+        this.snackBar.open('Classroom deleted. Scheduled sessions moved back to drafts.', 'Dismiss', { duration: 3000 });
+      }
+    });
   }
 }

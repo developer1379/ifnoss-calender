@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ScheduleService, Teacher } from '../../services/schedule.service';
-import { TeacherDialog } from '../dialogs';
+import { TeacherDialog, ConfirmDialog } from '../dialogs';
 
 @Component({
   selector: 'app-teachers',
@@ -182,9 +182,21 @@ export class TeachersComponent {
   }
 
   deleteTeacher(teacher: Teacher) {
-    if (confirm(`Are you sure you want to delete ${teacher.name}? This will also delete any class sessions scheduled with this teacher.`)) {
-      this.scheduleService.deleteTeacher(teacher.id);
-      this.snackBar.open('Teacher deleted and associated classes removed.', 'Dismiss', { duration: 3000 });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '360px',
+      data: {
+        title: 'Delete Teacher',
+        message: `Are you sure you want to delete ${teacher.name}? This will also delete any class sessions scheduled with this teacher.`,
+        confirmText: 'Delete',
+        confirmBg: '#DC2626'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.scheduleService.deleteTeacher(teacher.id);
+        this.snackBar.open('Teacher deleted and associated classes removed.', 'Dismiss', { duration: 3000 });
+      }
+    });
   }
 }

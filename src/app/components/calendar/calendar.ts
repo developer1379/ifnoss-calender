@@ -16,7 +16,7 @@ import {
   Course,
   Room,
 } from '../../services/schedule.service';
-import { ScheduleDialog } from '../dialogs';
+import { ScheduleDialog, ConfirmDialog } from '../dialogs';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
@@ -855,30 +855,66 @@ export class CalendarComponent implements OnInit {
   }
 
   deleteSession(id: string) {
-    if (confirm('Delete this draft session?')) {
-      this.scheduleService.deleteSession(id);
-      this.snackBar.open('Draft session deleted.', 'Dismiss', { duration: 3000 });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '360px',
+      data: {
+        title: 'Delete Session Draft',
+        message: 'Are you sure you want to delete this draft class session?',
+        confirmText: 'Delete',
+        confirmBg: '#DC2626'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.scheduleService.deleteSession(id);
+        this.snackBar.open('Draft session deleted.', 'Dismiss', { duration: 3000 });
+      }
+    });
   }
 
   resetDatabase() {
-    if (confirm('Reset system mock database? This will reload seeded teachers, courses, rooms, and sessions, and overwrite custom edits.')) {
-      localStorage.removeItem('scheduler_teachers');
-      localStorage.removeItem('scheduler_courses');
-      localStorage.removeItem('scheduler_rooms');
-      localStorage.removeItem('scheduler_sessions');
-      window.location.reload();
-    }
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '380px',
+      data: {
+        title: 'Reset Demo Database',
+        message: 'This will reset all courses, classrooms, teachers, and session listings back to default mock seeds. All your custom changes will be lost.',
+        confirmText: 'Reset DB',
+        confirmBg: '#DC2626'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        localStorage.removeItem('scheduler_teachers');
+        localStorage.removeItem('scheduler_courses');
+        localStorage.removeItem('scheduler_rooms');
+        localStorage.removeItem('scheduler_sessions');
+        window.location.reload();
+      }
+    });
   }
 
   clearAllSchedules() {
-    if (confirm('Are you sure you want to clear the entire calendar grid? All scheduled classes will be moved back to the Unscheduled Drafts pool.')) {
-      const scheduled = this.sessions().filter((s) => s.day || s.roomId);
-      for (const s of scheduled) {
-        this.scheduleService.moveSession(s.id, null, null, null, null);
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      width: '380px',
+      data: {
+        title: 'Clear Calendar Grid',
+        message: 'Are you sure you want to empty the entire calendar? All scheduled classes will be returned to the unscheduled drafts list.',
+        confirmText: 'Clear Grid',
+        confirmBg: '#DC2626'
       }
-      this.snackBar.open('All classes moved back to drafts.', 'Dismiss', { duration: 3000 });
-    }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        const scheduled = this.sessions().filter((s) => s.day || s.roomId);
+        for (const s of scheduled) {
+          this.scheduleService.moveSession(s.id, null, null, null, null);
+        }
+        this.snackBar.open('All classes moved back to drafts.', 'Dismiss', { duration: 3000 });
+      }
+    });
   }
 
   prevWeek() {
