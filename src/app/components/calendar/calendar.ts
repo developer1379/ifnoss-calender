@@ -612,14 +612,14 @@ const TOUR_STEPS: TourStep[] = [
           [style.width]="tourStyle().width"
           [style.height]="tourStyle().height"
           [style.display]="tourStyle().display"
-          class="absolute rounded-2xl border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 pointer-events-auto tour-spotlight-box"
+          class="fixed rounded-2xl border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] pointer-events-auto tour-spotlight-box"
         ></div>
         
         <!-- Tooltip Card -->
         <div
           [style.top]="tourTooltipStyle().top"
           [style.left]="tourTooltipStyle().left"
-          class="absolute bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl z-[101] flex flex-col gap-4 w-[320px] transition-all duration-300 pointer-events-auto select-none"
+          class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl z-[101] flex flex-col gap-4 w-[320px] pointer-events-auto select-none"
         >
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <span class="text-xs font-black text-slate-800 tracking-tight">{{ getActiveStep().title }}</span>
@@ -808,14 +808,27 @@ export class CalendarComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Spotlight rectangle styles
-      this.tourStyle.set({
-        top: `${rect.top - 6}px`,
-        left: `${rect.left - 6}px`,
-        width: `${rect.width + 12}px`,
-        height: `${rect.height + 12}px`,
-        display: 'block'
-      });
+      // Sticky header safety margin checks
+      const headerHeight = 70;
+      if (rect.top < headerHeight) {
+        // If element is behind header, hide the highlight box so it doesn't overlap header
+        this.tourStyle.set({
+          top: '0px',
+          left: '0px',
+          width: '0px',
+          height: '0px',
+          display: 'none'
+        });
+      } else {
+        // Spotlight rectangle styles
+        this.tourStyle.set({
+          top: `${rect.top - 6}px`,
+          left: `${rect.left - 6}px`,
+          width: `${rect.width + 12}px`,
+          height: `${rect.height + 12}px`,
+          display: 'block'
+        });
+      }
       
       // Tooltip balloon placement
       let tooltipTop = 0;
@@ -846,7 +859,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
       if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
         tooltipLeft = window.innerWidth - tooltipWidth - 10;
       }
-      if (tooltipTop < 10) tooltipTop = 10;
+      
+      // Clamp tooltip below header safety boundary
+      if (tooltipTop < headerHeight + 5) tooltipTop = headerHeight + 5;
       if (tooltipTop + tooltipHeight > window.innerHeight - 10) {
         tooltipTop = window.innerHeight - tooltipHeight - 10;
       }
