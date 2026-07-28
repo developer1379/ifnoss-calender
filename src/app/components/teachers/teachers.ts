@@ -60,52 +60,62 @@ import { TeacherDialog, ConfirmDialog } from '../dialogs';
         </div>
       </div>
 
-      <!-- Teachers Compact Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1">
+      <!-- Teachers Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-1">
         <div
           *ngFor="let teacher of filteredTeachers()"
           [style.border-left-color]="teacher.color"
-          class="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col justify-between transition group shadow-sm hover:shadow-md hover:border-slate-350 relative overflow-hidden border-l-4"
+          [style.background]="'linear-gradient(135deg, #ffffff 0%, ' + teacher.color + '05 100%)'"
+          class="bg-white border border-slate-200/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group shadow-[0_2px_8px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-slate-300 relative overflow-hidden border-l-[5px]"
         >
-          <div>
+          <!-- Top Accent Light Glow -->
+          <div [style.background]="'linear-gradient(90deg, ' + teacher.color + '00, ' + teacher.color + '15, ' + teacher.color + '00)'" class="absolute top-0 left-0 right-0 h-[2px]"></div>
+
+          <div class="flex flex-col gap-3">
             <div class="flex items-start justify-between gap-2.5">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <!-- Teacher Initials/Avatar Circle -->
-                <div [style.background-color]="teacher.color + '15'" [style.border-color]="teacher.color + '40'" class="w-9 h-9 rounded-lg border flex items-center justify-center font-bold flex-shrink-0 shadow-sm overflow-hidden">
+              <div class="flex items-center gap-3 min-w-0">
+                <!-- Teacher Avatar/Initials -->
+                <div [style.background-color]="teacher.color + '15'" [style.border-color]="teacher.color + '30'" class="w-11 h-11 rounded-xl border flex items-center justify-center font-bold flex-shrink-0 shadow-[0_2px_6px_rgba(0,0,0,0.03)] overflow-hidden">
                   <img *ngIf="teacher.avatarUrl" [src]="teacher.avatarUrl" class="w-full h-full object-cover" [alt]="teacher.name" />
-                  <span *ngIf="!teacher.avatarUrl" [style.color]="teacher.color" class="font-black text-xs tracking-tight">{{ getInitials(teacher.name) }}</span>
+                  <span *ngIf="!teacher.avatarUrl" [style.color]="teacher.color" class="font-extrabold text-sm tracking-tight">{{ getInitials(teacher.name) }}</span>
                 </div>
                 <div class="min-w-0">
-                  <h3 class="font-bold text-slate-800 text-xs group-hover:text-blue-650 transition-colors leading-snug truncate">{{ teacher.name }}</h3>
-                  <span class="text-[9px] text-slate-500 leading-none truncate block mt-0.5">{{ teacher.department }}</span>
+                  <h3 class="font-bold text-slate-800 text-xs sm:text-sm group-hover:text-blue-650 transition-colors leading-snug truncate">{{ teacher.name }}</h3>
+                  <span class="text-[9px] font-black text-blue-600 bg-blue-50/50 border border-blue-100/40 px-2 py-0.5 rounded-full uppercase tracking-wider inline-block mt-1 leading-none">{{ teacher.department }}</span>
                 </div>
               </div>
 
               <!-- Action buttons -->
-              <div class="flex gap-0.5 flex-shrink-0">
-                <button (click)="openTeacherDialog(teacher)" class="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-slate-50 text-slate-450 hover:text-blue-600 transition cursor-pointer" title="Edit Teacher">
+              <div class="flex gap-1 flex-shrink-0">
+                <button (click)="openTeacherDialog(teacher)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-450 hover:text-blue-600 transition-all duration-200 cursor-pointer shadow-sm border border-slate-100" title="Edit Teacher">
                   <mat-icon class="text-xs w-3.5 h-3.5 flex items-center justify-center">edit</mat-icon>
                 </button>
-                <button (click)="deleteTeacher(teacher)" class="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-red-50/50 text-slate-450 hover:text-red-650 transition cursor-pointer" title="Delete Teacher">
+                <button (click)="deleteTeacher(teacher)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-red-50 text-slate-455 hover:text-red-650 transition-all duration-200 cursor-pointer shadow-sm border border-slate-100" title="Delete Teacher">
                   <mat-icon class="text-xs w-3.5 h-3.5 flex items-center justify-center">delete</mat-icon>
                 </button>
               </div>
             </div>
 
-            <!-- Detail row with email and compact availability badges -->
-            <div class="mt-3 pt-2.5 border-t border-slate-100/80 flex flex-wrap items-center justify-between gap-2">
-              <div class="flex items-center gap-1 text-[10px] text-slate-500 font-mono truncate max-w-[150px]" [title]="teacher.email">
-                <mat-icon class="text-[10px] text-slate-400 w-3 h-3 flex items-center justify-center">email</mat-icon>
-                <span class="truncate">{{ teacher.email }}</span>
-              </div>
-              <div class="flex flex-wrap gap-1">
-                <span
-                  *ngFor="let day of teacher.availability"
-                  class="text-[8px] bg-blue-50/60 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100/50 font-extrabold tracking-wide uppercase"
-                >
-                  {{ day.substring(0, 3) }}
-                </span>
-              </div>
+            <!-- Email Detail Row -->
+            <div class="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium font-mono truncate max-w-full bg-slate-50/50 border border-slate-100/60 p-2 rounded-xl" [title]="teacher.email">
+              <mat-icon class="text-[10px] text-slate-400 w-3.5 h-3.5 flex items-center justify-center">email</mat-icon>
+              <span class="truncate">{{ teacher.email }}</span>
+            </div>
+          </div>
+
+          <!-- Availability badges section -->
+          <div class="mt-4 pt-3 border-t border-slate-100/80 flex flex-wrap items-center justify-between gap-1.5">
+            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Availability</span>
+            <div class="flex flex-wrap gap-1">
+              <span
+                *ngFor="let day of teacher.availability"
+                [style.background-color]="teacher.color + '09'"
+                [style.border-color]="teacher.color + '20'"
+                [style.color]="teacher.color"
+                class="text-[8px] px-2 py-0.5 rounded-full border font-extrabold tracking-wide uppercase shadow-[0_1px_2px_rgba(0,0,0,0.01)]"
+              >
+                {{ day.substring(0, 3) }}
+              </span>
             </div>
           </div>
         </div>

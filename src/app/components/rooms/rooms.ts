@@ -60,43 +60,52 @@ import { RoomDialog, ConfirmDialog } from '../dialogs';
         </div>
       </div>
 
-      <!-- Classrooms Compact Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1">
+      <!-- Classrooms Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-1">
         <div
           *ngFor="let room of filteredRooms()"
-          class="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col justify-between transition group shadow-sm hover:shadow-md hover:border-slate-350 relative overflow-hidden border-l-4 border-l-amber-500"
+          [style.border-left-color]="getRoomTheme(room.type).color"
+          [style.background]="'linear-gradient(135deg, #ffffff 0%, ' + getRoomTheme(room.type).color + '05 100%)'"
+          class="bg-white border border-slate-200/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group shadow-[0_2px_8px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-slate-300 relative overflow-hidden border-l-[5px]"
         >
-          <div>
+          <!-- Top Accent Light Glow -->
+          <div [style.background]="'linear-gradient(90deg, ' + getRoomTheme(room.type).color + '00, ' + getRoomTheme(room.type).color + '15, ' + getRoomTheme(room.type).color + '00)'" class="absolute top-0 left-0 right-0 h-[2px]"></div>
+
+          <div class="flex flex-col gap-3">
             <div class="flex items-start justify-between gap-2.5">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 border border-amber-100/50 flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <mat-icon class="text-base">{{ getRoomIcon(room.type) }}</mat-icon>
+              <div class="flex items-center gap-3 min-w-0">
+                <!-- Room Icon Container -->
+                <div [style.background-color]="getRoomTheme(room.type).iconBg" [style.border-color]="getRoomTheme(room.type).color + '30'" class="w-11 h-11 rounded-xl border flex items-center justify-center flex-shrink-0 shadow-[0_2px_6px_rgba(0,0,0,0.03)]">
+                  <mat-icon [style.color]="getRoomTheme(room.type).color" class="text-lg w-5 h-5 flex items-center justify-center">{{ getRoomTheme(room.type).icon }}</mat-icon>
                 </div>
                 <div class="min-w-0">
-                  <h3 class="font-extrabold text-slate-800 text-xs group-hover:text-amber-605 transition-colors leading-snug truncate">{{ room.name }}</h3>
-                  <span class="text-[9px] text-slate-500 leading-none truncate block mt-0.5">{{ room.type }}</span>
+                  <h3 class="font-bold text-slate-800 text-xs sm:text-sm group-hover:text-blue-650 transition-colors leading-snug truncate">{{ room.name }}</h3>
+                  <span [style.color]="getRoomTheme(room.type).color" [style.background-color]="getRoomTheme(room.type).color + '08'" [style.border-color]="getRoomTheme(room.type).color + '20'" class="text-[9px] font-black border px-2 py-0.5 rounded-full uppercase tracking-wider inline-block mt-1 leading-none">{{ room.type }}</span>
                 </div>
               </div>
 
               <!-- Action buttons -->
-              <div class="flex gap-0.5 flex-shrink-0">
-                <button (click)="openRoomDialog(room)" class="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-slate-50 text-slate-455 hover:text-blue-600 transition cursor-pointer" title="Edit Room">
+              <div class="flex gap-1 flex-shrink-0">
+                <button (click)="openRoomDialog(room)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-amber-50 text-slate-455 hover:text-amber-600 transition-all duration-200 cursor-pointer shadow-sm border border-slate-100" title="Edit Room">
                   <mat-icon class="text-xs w-3.5 h-3.5 flex items-center justify-center">edit</mat-icon>
                 </button>
-                <button (click)="deleteRoom(room)" class="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-red-50/50 text-slate-455 hover:text-red-650 transition cursor-pointer" title="Delete Room">
+                <button (click)="deleteRoom(room)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-red-50 text-slate-455 hover:text-red-650 transition-all duration-200 cursor-pointer shadow-sm border border-slate-100" title="Delete Room">
                   <mat-icon class="text-xs w-3.5 h-3.5 flex items-center justify-center">delete</mat-icon>
                 </button>
               </div>
             </div>
 
-            <!-- Capacity details -->
-            <div class="mt-3.5 flex items-center justify-between text-[10px] text-slate-650 border-t border-slate-100/60 pt-2.5">
-              <div class="flex items-center gap-1.5 text-slate-500 font-semibold">
-                <mat-icon class="text-[10px] text-slate-400 w-3.5 h-3.5 flex items-center justify-center">groups</mat-icon>
-                <span>Max Capacity</span>
-              </div>
-              <span class="font-extrabold text-slate-700 bg-slate-105 border border-slate-200 px-2 py-0.5 rounded-full text-[9px] flex-shrink-0">{{ room.capacity }} Seats</span>
+            <!-- Type Description Row -->
+            <div class="flex items-center gap-1.5 text-[9.5px] text-slate-500 font-semibold bg-slate-50/50 border border-slate-100/60 p-2 rounded-xl">
+              <mat-icon class="text-[10px] text-slate-400 w-3.5 h-3.5 flex items-center justify-center">info_outline</mat-icon>
+              <span class="truncate">Type: {{ room.type }} Configuration</span>
             </div>
+          </div>
+
+          <!-- Capacity details section -->
+          <div class="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between gap-1.5">
+            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Max Seating Capacity</span>
+            <span class="font-extrabold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full text-[9px] flex-shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">{{ room.capacity }} Seats</span>
           </div>
         </div>
       </div>
@@ -152,6 +161,35 @@ export class RoomsComponent {
         return 'co_present';
       default:
         return 'corporate_fare';
+    }
+  }
+
+  getRoomTheme(type: string) {
+    switch (type) {
+      case 'Lab':
+        return {
+          color: '#6366f1',
+          bg: '#eef2ff',
+          border: '#e0e7ff',
+          iconBg: '#6366f115',
+          icon: 'computer'
+        };
+      case 'Seminar Room':
+        return {
+          color: '#a855f7',
+          bg: '#f3e8ff',
+          border: '#e9d5ff',
+          iconBg: '#a855f715',
+          icon: 'co_present'
+        };
+      default: // Lecture Hall
+        return {
+          color: '#f59e0b',
+          bg: '#fef3c7',
+          border: '#fde68a',
+          iconBg: '#f59e0b15',
+          icon: 'corporate_fare'
+        };
     }
   }
 

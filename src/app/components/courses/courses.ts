@@ -60,46 +60,53 @@ import { CourseDialog, ConfirmDialog } from '../dialogs';
         </div>
       </div>
 
-      <!-- Courses Compact Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1">
+      <!-- Courses Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-1">
         <div
           *ngFor="let course of filteredCourses()"
-          class="bg-white border border-slate-200/80 rounded-xl p-3.5 flex flex-col justify-between transition group shadow-sm hover:shadow-md hover:border-slate-350 relative overflow-hidden border-l-4 border-l-blue-600"
+          class="bg-white border border-slate-200/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 group shadow-[0_2px_8px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 hover:border-slate-300 relative overflow-hidden border-l-[5px] border-l-indigo-600"
+          style="background: linear-gradient(135deg, #ffffff 0%, rgba(79, 70, 229, 0.02) 100%)"
         >
-          <div>
+          <!-- Top Accent Light Glow -->
+          <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500/0 via-indigo-500/20 to-indigo-500/0"></div>
+
+          <div class="flex flex-col gap-3">
             <div class="flex items-start justify-between gap-2.5">
               <div class="min-w-0">
-                <span class="text-[9px] font-extrabold bg-blue-50 text-blue-700 border border-blue-100 rounded px-2 py-0.5 uppercase tracking-wider font-mono inline-block">
+                <span class="text-[9px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-100/60 px-2.5 py-0.5 rounded-lg uppercase tracking-wider font-mono inline-block shadow-[0_1px_2px_rgba(79,70,229,0.05)]">
                   {{ course.code }}
                 </span>
-                <h3 class="font-extrabold text-slate-800 text-xs group-hover:text-blue-650 transition-colors mt-2.5 leading-snug truncate" [title]="course.name">
+                <h3 class="font-bold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors mt-3 leading-snug truncate" [title]="course.name">
                   {{ course.name }}
                 </h3>
               </div>
 
               <!-- Action buttons -->
-              <div class="flex gap-0.5 flex-shrink-0">
-                <button (click)="openCourseDialog(course)" class="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-slate-50 text-slate-450 hover:text-blue-600 transition cursor-pointer" title="Edit Course">
+              <div class="flex gap-1 flex-shrink-0">
+                <button (click)="openCourseDialog(course)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-450 hover:text-indigo-600 transition-all duration-200 cursor-pointer shadow-sm border border-slate-100" title="Edit Course">
                   <mat-icon class="text-xs w-3.5 h-3.5 flex items-center justify-center">edit</mat-icon>
                 </button>
-                <button (click)="deleteCourse(course)" class="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-red-50/50 text-slate-450 hover:text-red-650 transition cursor-pointer" title="Delete Course">
+                <button (click)="deleteCourse(course)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-red-50 text-slate-455 hover:text-red-650 transition-all duration-200 cursor-pointer shadow-sm border border-slate-100" title="Delete Course">
                   <mat-icon class="text-xs w-3.5 h-3.5 flex items-center justify-center">delete</mat-icon>
                 </button>
               </div>
             </div>
 
-            <!-- Department & Enrollment details -->
-            <div class="mt-3.5 flex items-center justify-between text-[10px] text-slate-650 border-t border-slate-100/60 pt-2.5">
-              <div class="flex items-center gap-1 text-slate-500 font-semibold truncate max-w-[140px]">
-                <mat-icon class="text-[10px] text-slate-400 w-3 h-3 flex items-center justify-center">lan</mat-icon>
-                <span class="truncate">{{ course.department }}</span>
-              </div>
-              <div class="flex items-center gap-1 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0">
-                <span class="relative flex h-1.2 w-1.2">
-                  <span class="relative inline-flex rounded-full h-1.2 w-1.2 bg-emerald-500"></span>
-                </span>
-                <span>{{ course.enrolledStudents }} Enrolled</span>
-              </div>
+            <!-- Subject Area Badge -->
+            <div class="flex items-center gap-1.5 text-[9.5px] text-slate-500 font-semibold bg-slate-50/50 border border-slate-100/60 p-2 rounded-xl">
+              <mat-icon class="text-[10px] text-slate-400 w-3.5 h-3.5 flex items-center justify-center">lan</mat-icon>
+              <span class="truncate">Area: {{ course.department }}</span>
+            </div>
+          </div>
+
+          <!-- Enrollment Details section -->
+          <div class="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between gap-1.5">
+            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enrolled Students</span>
+            <div class="flex items-center gap-1.5 font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/50 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              <span class="text-[9px]">{{ course.enrolledStudents }} Enrolled</span>
             </div>
           </div>
         </div>
