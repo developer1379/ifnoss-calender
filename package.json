@@ -8,11 +8,6 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
-  "private": true,
-  "engines": {
-    "node": "20.x"
-  },
-  "packageManager": "npm@11.12.1",
   "dependencies": {
     "@angular/animations": "^21.2.0",
     "@angular/cdk": "^21.2.14",
