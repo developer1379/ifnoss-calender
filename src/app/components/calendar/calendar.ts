@@ -218,9 +218,6 @@ const TOUR_STEPS: TourStep[] = [
 
         <div class="flex items-center gap-1.5 flex-wrap">
           <!-- Reset and Clear option buttons -->
-          <button (click)="startTour()" class="text-xs bg-blue-50 border border-blue-200/60 text-blue-650 hover:bg-blue-100/60 font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer transition-colors" title="Start interactive walk-through tour">
-            <mat-icon class="text-blue-500 text-sm">help_outline</mat-icon> Tour Guide
-          </button>
           <button (click)="resetDatabase()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer transition-colors" title="Reset system mock database">
             <mat-icon class="text-slate-500 text-sm">refresh</mat-icon> Reset DB
           </button>
