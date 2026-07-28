@@ -1,13 +1,4 @@
 @import "tailwindcss";
-@source "../src/app/**/*.ts";
-@source "../src/app/**/*.html";
-@source "../src/index.html";
-@source "./app/**/*.ts";
-@source "./app/**/*.html";
-@source "./index.html";
-@source "./src/app/**/*.ts";
-@source "./src/app/**/*.html";
-@source "./src/index.html";
 
 /* Base typography and premium glossy background layout */
 html, body {
