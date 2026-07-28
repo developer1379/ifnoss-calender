@@ -1228,7 +1228,7 @@ export class CalendarComponent implements OnInit {
         // We open the dialog pre-filled with day/time, allowing the user to select the room.
         const dialogRef = this.dialog.open(ScheduleDialog, {
           width: '450px',
-          data: { session: null, defaultDay: day, defaultTime: hour },
+          data: { session: session, defaultDay: day, defaultTime: hour },
         });
 
         dialogRef.afterClosed().subscribe((res) => {

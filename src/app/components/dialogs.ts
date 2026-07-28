@@ -398,7 +398,7 @@ export class RoomDialog implements OnInit {
     <div class="p-6 max-w-md w-full bg-white text-slate-800 rounded-xl shadow-lg border border-slate-100">
       <h2 mat-dialog-title class="text-xl font-bold flex items-center gap-2 border-b border-slate-100 pb-3 text-slate-800">
         <mat-icon class="text-blue-600">calendar_today</mat-icon>
-        {{ data.session ? 'Edit Scheduled Session' : 'Schedule Class Session' }}
+        {{ isEditMode ? 'Edit Scheduled Session' : 'Schedule Class Session' }}
       </h2>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-4 flex flex-col gap-4">
         <!-- Course Selection -->
@@ -477,14 +477,14 @@ export class RoomDialog implements OnInit {
 
         <div mat-dialog-actions class="flex justify-between items-center pt-4 border-t border-slate-100 w-full">
           <div>
-            <button *ngIf="data.session" mat-button type="button" (click)="onDelete()" class="text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 cursor-pointer">
-              <mat-icon class="text-red-600 text-base">delete</mat-icon> Unschedule
+            <button *ngIf="isEditMode" mat-button type="button" (click)="onDelete()" class="text-red-650 hover:text-red-800 font-semibold flex items-center gap-1 cursor-pointer">
+              <mat-icon class="text-red-650 text-base">delete</mat-icon> Unschedule
             </button>
           </div>
           <div class="flex gap-2">
             <button mat-button type="button" (click)="onCancel()" class="text-slate-500 hover:text-slate-700">Cancel</button>
             <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg cursor-pointer">
-              {{ data.session ? 'Update' : 'Schedule' }}
+              {{ isEditMode ? 'Update' : 'Schedule' }}
             </button>
           </div>
         </div>
@@ -515,6 +515,7 @@ export class ScheduleDialog implements OnInit {
   days = DAYS_OF_WEEK;
   conflictWarning: string | null = null;
   capacityWarning: string | null = null;
+  isEditMode = false;
 
   constructor(
     private fb: FormBuilder,
@@ -524,6 +525,7 @@ export class ScheduleDialog implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.isEditMode = !!(this.data.session && this.data.session.day && this.data.session.roomId);
     this.teachers = this.scheduleService.teachers();
     this.courses = this.scheduleService.courses();
     this.rooms = this.scheduleService.rooms();
