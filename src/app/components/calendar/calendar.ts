@@ -21,6 +21,46 @@ import { ScheduleDialog, ConfirmDialog } from '../dialogs';
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
+interface TourStep {
+  elementId: string;
+  title: string;
+  description: string;
+  position: 'bottom' | 'top' | 'left' | 'right' | 'center';
+}
+
+const TOUR_STEPS: TourStep[] = [
+  {
+    elementId: 'tour-dashboard-stats',
+    title: '📊 Dashboard Overview',
+    description: 'Get real-time insights into your schedule health. Here you will see the total number of scheduled classes, active overlaps, capacity warnings, and unassigned drafts.',
+    position: 'bottom'
+  },
+  {
+    elementId: 'tour-drafts-panel',
+    title: '📝 Unscheduled Drafts Pool',
+    description: 'Create draft slots using the Quick Draft Builder. Drag cards from this panel directly onto the calendar cells to schedule them, or drag them back to unschedule them.',
+    position: 'right'
+  },
+  {
+    elementId: 'tour-calendar-grid',
+    title: '📅 Interactive Weekly Grid',
+    description: 'Double-click any empty slot to schedule a new class. Drag cards to relocate them. You can also duplicate classes by holding Ctrl or Shift while dragging!',
+    position: 'left'
+  },
+  {
+    elementId: 'tour-conflicts-panel',
+    title: '⚠️ Real-Time Conflicts & Alerts',
+    description: 'View real-time alerts for teacher clashes, room double-bookings, or seating capacity mismatches. Click any alert to open the conflict resolver dialog.',
+    position: 'left'
+  },
+  {
+    elementId: 'tour-class-cards',
+    title: '🖱️ Right-Click Quick Actions',
+    description: 'Right-click any class card on the calendar to open a professional context menu. This lets you inspect details, edit settings, duplicate, or delete the class instantly.',
+    position: 'bottom'
+  }
+];
+
 @Component({
   selector: 'app-calendar',
   standalone: true,
@@ -40,7 +80,7 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
     <div class="flex flex-col h-full gap-4 text-slate-800">
       
       <!-- Top Overview Dashboard Stats -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+      <div id="tour-dashboard-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
         <!-- Card 1: Scheduled Classes -->
         <div class="bg-white border border-slate-200/80 rounded-2xl p-5 flex items-center gap-4 shadow-[0_2px_12px_-3px_rgba(15,23,42,0.03)] hover:shadow-md hover:border-slate-300 transition-all border-l-4 border-l-blue-500">
           <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/50 flex items-center justify-center shadow-[0_2px_8px_rgba(37,99,235,0.06)] flex-shrink-0">
@@ -178,6 +218,9 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
 
         <div class="flex items-center gap-1.5 flex-wrap">
           <!-- Reset and Clear option buttons -->
+          <button (click)="startTour()" class="text-xs bg-blue-50 border border-blue-200/60 text-blue-650 hover:bg-blue-100/60 font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer transition-colors" title="Start interactive walk-through tour">
+            <mat-icon class="text-blue-500 text-sm">help_outline</mat-icon> Tour Guide
+          </button>
           <button (click)="resetDatabase()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer transition-colors" title="Reset system mock database">
             <mat-icon class="text-slate-500 text-sm">refresh</mat-icon> Reset DB
           </button>
@@ -205,7 +248,7 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
       <div class="flex flex-col xl:flex-row gap-4 items-stretch h-auto min-h-[600px]">
         
         <!-- Left Sidebar: Unscheduled Drafts Pool (CDK Drop Zone) -->
-        <div class="xl:w-64 bg-white/70 border border-white/60 backdrop-blur-xl rounded-xl p-4 flex flex-col gap-4 shadow-sm">
+        <div id="tour-drafts-panel" class="xl:w-64 bg-white/70 border border-white/60 backdrop-blur-xl rounded-xl p-4 flex flex-col gap-4 shadow-sm">
           <div class="border-b border-slate-100 pb-3">
             <h3 class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
               <mat-icon class="text-emerald-600">drafts</mat-icon>
@@ -268,7 +311,7 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
         </div>
 
         <!-- Center: Week Calendar Grid (Aligned Rows and CDK Drop Zones) -->
-        <div class="flex-grow bg-white/70 border border-white/60 backdrop-blur-xl rounded-xl overflow-hidden flex flex-col shadow-sm">
+        <div id="tour-calendar-grid" class="flex-grow bg-white/70 border border-white/60 backdrop-blur-xl rounded-xl overflow-hidden flex flex-col shadow-sm">
           <!-- Date Switcher Bar -->
           <div class="border-b border-slate-200/60 bg-white/40 p-3 flex items-center justify-between flex-wrap gap-2">
             <div class="flex items-center gap-2">
@@ -342,6 +385,7 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
                   *ngFor="let session of getSessionsForCell(day, hour)"
                   cdkDrag
                   [cdkDragData]="session"
+                  [id]="session.id === firstScheduledSession()?.id ? 'tour-class-cards' : ''"
                   [style.top.px]="getSessionTopOffset(session)"
                   [style.height.px]="getSessionCardHeight(session)"
                   [style.border-left-color]="getTeacherColor(session.teacherId)"
@@ -399,7 +443,7 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
         </div>
 
         <!-- Right Sidebar: Active Conflicts & Resolution Dashboard -->
-        <div class="xl:w-72 bg-white/70 border border-white/60 backdrop-blur-xl rounded-xl p-4 flex flex-col gap-4 shadow-sm">
+        <div id="tour-conflicts-panel" class="xl:w-72 bg-white/70 border border-white/60 backdrop-blur-xl rounded-xl p-4 flex flex-col gap-4 shadow-sm">
           <div class="border-b border-slate-100 pb-3">
             <h3 class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
               <mat-icon class="text-red-600">warning_amber</mat-icon>
@@ -546,6 +590,62 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
         </div>
       </div>
 
+      <!-- Tour Guide Overlay Backdrop & Spotlight -->
+      <div *ngIf="tourActive()" class="fixed inset-0 z-[100] pointer-events-none select-none overflow-hidden">
+        <!-- Spotlight highlight ring -->
+        <div
+          [style.top]="tourStyle().top"
+          [style.left]="tourStyle().left"
+          [style.width]="tourStyle().width"
+          [style.height]="tourStyle().height"
+          [style.display]="tourStyle().display"
+          class="absolute rounded-2xl border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 pointer-events-auto tour-spotlight-box"
+        ></div>
+        
+        <!-- Tooltip Card -->
+        <div
+          [style.top]="tourTooltipStyle().top"
+          [style.left]="tourTooltipStyle().left"
+          class="absolute bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-5 shadow-2xl z-[101] flex flex-col gap-4 w-[320px] transition-all duration-300 pointer-events-auto select-none"
+        >
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span class="text-xs font-black text-slate-800 tracking-tight">{{ getActiveStep().title }}</span>
+            <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-mono">
+              {{ tourStepIdx() + 1 }} of {{ totalSteps }}
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-650 leading-relaxed font-semibold">
+            {{ getActiveStep().description }}
+          </p>
+          
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div class="bg-blue-600 h-1.5 transition-all duration-300" [style.width.%]="((tourStepIdx() + 1) / totalSteps) * 100"></div>
+          </div>
+          
+          <div class="flex justify-between items-center mt-1 pt-3 border-t border-slate-100">
+            <button (click)="skipTour()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 transition cursor-pointer">
+              Skip Tour
+            </button>
+            <div class="flex gap-2">
+              <button
+                *ngIf="tourStepIdx() > 0"
+                (click)="prevTourStep()"
+                class="text-[10px] border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-1.5 rounded-lg transition cursor-pointer"
+              >
+                Back
+              </button>
+              <button
+                (click)="nextTourStep()"
+                class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg shadow-sm hover:shadow transition cursor-pointer"
+              >
+                {{ tourStepIdx() === totalSteps - 1 ? 'Finish' : 'Next' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   `,
   styles: [`
@@ -582,11 +682,151 @@ const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '1
     .light-option:hover {
       background-color: #F1F5F9 !important;
     }
+    .tour-spotlight-box {
+      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.65);
+    }
   `],
 })
 export class CalendarComponent implements OnInit {
   days = DAYS;
   hours = HOURS;
+
+  tourActive = signal(false);
+  tourStepIdx = signal(0);
+  totalSteps = TOUR_STEPS.length;
+  tourStyle = signal<{ top: string; left: string; width: string; height: string; display: string }>({
+    top: '0px',
+    left: '0px',
+    width: '0px',
+    height: '0px',
+    display: 'none'
+  });
+  tourTooltipStyle = signal<{ top: string; left: string }>({ top: '0px', left: '0px' });
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    if (this.tourActive()) {
+      this.updateTourStep();
+    }
+  }
+
+  startTour() {
+    this.tourStepIdx.set(0);
+    this.tourActive.set(true);
+    this.updateTourStep();
+  }
+
+  skipTour() {
+    this.tourActive.set(false);
+    localStorage.setItem('scheduler_tour_completed', 'true');
+    this.snackBar.open('You can restart the tour anytime using the Tour Guide button.', 'Dismiss', { duration: 4000 });
+  }
+
+  nextTourStep() {
+    const nextIdx = this.tourStepIdx() + 1;
+    if (nextIdx < this.totalSteps) {
+      this.tourStepIdx.set(nextIdx);
+      this.updateTourStep();
+    } else {
+      this.tourActive.set(false);
+      localStorage.setItem('scheduler_tour_completed', 'true');
+      this.snackBar.open('Tour completed! You are ready to schedule.', 'Dismiss', { duration: 4000 });
+    }
+  }
+
+  prevTourStep() {
+    const prevIdx = this.tourStepIdx() - 1;
+    if (prevIdx >= 0) {
+      this.tourStepIdx.set(prevIdx);
+      this.updateTourStep();
+    }
+  }
+
+  getActiveStep() {
+    return TOUR_STEPS[this.tourStepIdx()];
+  }
+
+  updateTourStep() {
+    const idx = this.tourStepIdx();
+    const step = TOUR_STEPS[idx];
+    
+    // Auto-scroll the target element into view if needed
+    const el = document.getElementById(step.elementId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Wait for scroll to settle
+      setTimeout(() => {
+        const rect = el.getBoundingClientRect();
+        
+        // Spotlight rectangle styles
+        this.tourStyle.set({
+          top: `${rect.top - 6}px`,
+          left: `${rect.left - 6}px`,
+          width: `${rect.width + 12}px`,
+          height: `${rect.height + 12}px`,
+          display: 'block'
+        });
+        
+        // Tooltip balloon placement
+        let tooltipTop = 0;
+        let tooltipLeft = 0;
+        const offset = 20;
+        
+        const tooltipWidth = 320;
+        const tooltipHeight = 200;
+        
+        if (step.position === 'bottom') {
+          tooltipTop = rect.bottom + offset;
+          tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        } else if (step.position === 'top') {
+          tooltipTop = rect.top - tooltipHeight - offset;
+          tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        } else if (step.position === 'right') {
+          tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+          tooltipLeft = rect.right + offset;
+        } else if (step.position === 'left') {
+          tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+          tooltipLeft = rect.left - tooltipWidth - offset;
+        } else {
+          tooltipTop = window.innerHeight / 2 - tooltipHeight / 2;
+          tooltipLeft = window.innerWidth / 2 - tooltipWidth / 2;
+        }
+        
+        // Bound checks to keep tooltip inside viewport
+        if (tooltipLeft < 10) tooltipLeft = 10;
+        if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
+          tooltipLeft = window.innerWidth - tooltipWidth - 10;
+        }
+        if (tooltipTop < 10) tooltipTop = 10;
+        if (tooltipTop + tooltipHeight > window.innerHeight - 10) {
+          tooltipTop = window.innerHeight - tooltipHeight - 10;
+        }
+        
+        this.tourTooltipStyle.set({
+          top: `${tooltipTop}px`,
+          left: `${tooltipLeft}px`
+        });
+      }, 300);
+    } else {
+      this.tourStyle.set({
+        top: '0px',
+        left: '0px',
+        width: '0px',
+        height: '0px',
+        display: 'none'
+      });
+      this.tourTooltipStyle.set({
+        top: `${window.innerHeight / 2 - 100}px`,
+        left: `${window.innerWidth / 2 - 160}px`
+      });
+    }
+  }
+
+  readonly firstScheduledSession = computed(() => {
+    const list = this.scheduledSessions().filter(s => s.day && s.startTime && s.roomId);
+    return list.length > 0 ? list[0] : null;
+  });
 
   // Inline draft builder states
   newDraftCourseId = '';
@@ -838,6 +1078,13 @@ export class CalendarComponent implements OnInit {
 
   ngOnInit() {
     this.rebuildDropListIds();
+    // Auto-start tour on first visit after a slight delay
+    setTimeout(() => {
+      const tourCompleted = localStorage.getItem('scheduler_tour_completed');
+      if (tourCompleted !== 'true') {
+        this.startTour();
+      }
+    }, 1000);
   }
 
   // Generates the drop list ID selectors for CDK Drag and Drop
