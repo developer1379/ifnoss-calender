@@ -787,7 +787,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     const step = TOUR_STEPS[idx];
     const el = document.getElementById(step.elementId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
     }
     // Update position immediately and start/continue loop
     this.updateTourPosition();
