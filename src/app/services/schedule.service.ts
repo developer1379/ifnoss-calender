@@ -59,6 +59,14 @@ export class ScheduleService {
   private readonly http = inject(HttpClient);
   private readonly API_BASE = 'https://blueviolet-pony-257143.hostingersite.com';
 
+  // Shared UI signals
+  activeTabSignal = signal<number>(0);
+  tourTriggerSignal = signal<number>(0);
+
+  triggerTour() {
+    this.tourTriggerSignal.update(val => val + 1);
+  }
+
   // Signals for state
   private readonly teachersSignal = signal<Teacher[]>([]);
   private readonly coursesSignal = signal<Course[]>([]);

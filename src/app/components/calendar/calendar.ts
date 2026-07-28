@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject, OnInit, HostListener } from '@angular/core';
+import { Component, computed, signal, inject, OnInit, HostListener, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -504,87 +504,103 @@ const TOUR_STEPS: TourStep[] = [
         *ngIf="contextMenuVisible() && contextMenuSession() as session"
         [style.left.px]="contextMenuPosition().x"
         [style.top.px]="contextMenuPosition().y"
-        class="fixed bg-white/95 border border-slate-200/80 backdrop-blur-lg rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 min-w-[260px] max-w-[320px] select-none text-slate-800 transition-all scale-95 duration-100 animate-in fade-in zoom-in-95"
+        class="fixed bg-white/98 border border-slate-200/60 backdrop-blur-xl rounded-2xl p-4 shadow-[0_15px_30px_-5px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.06)] z-50 flex flex-col gap-3 min-w-[260px] max-w-[320px] select-none text-slate-800 transition-all scale-95 duration-100 animate-in fade-in zoom-in-95"
         (click)="$event.stopPropagation()"
       >
         <!-- Session Header Info -->
-        <div class="flex flex-col gap-1 border-b border-slate-100 pb-2.5">
+        <div class="flex flex-col gap-1.5 border-b border-slate-100 pb-3">
           <div class="flex items-center gap-1.5 justify-between">
-            <span class="text-[9px] font-black bg-indigo-50 text-indigo-700 border border-indigo-100/60 px-2 py-0.5 rounded-md font-mono">
+            <span
+              [style.background-color]="getTeacherColor(session.teacherId) + '15'"
+              [style.color]="getTeacherColor(session.teacherId)"
+              [style.border-color]="getTeacherColor(session.teacherId) + '25'"
+              class="text-[9px] font-black border px-2 py-0.5 rounded font-mono"
+            >
               {{ getCourseCode(session.courseId) }}
             </span>
-            <span class="text-[8px] font-bold text-slate-400 font-mono">{{ session.startTime }} - {{ session.endTime }}</span>
+            <span class="text-[8.5px] font-bold text-slate-450 font-mono tracking-tight">{{ session.startTime }} - {{ session.endTime }}</span>
           </div>
           <div class="text-xs font-black text-slate-800 leading-snug mt-1 truncate">{{ getCourseName(session.courseId) }}</div>
         </div>
 
         <!-- Detail rows -->
-        <div class="flex flex-col gap-2 text-[10px] text-slate-650 bg-slate-50/70 border border-slate-100/40 p-2.5 rounded-xl">
-          <div class="flex items-center gap-2">
-            <div class="w-5 h-5 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center flex-shrink-0">
+        <div class="flex flex-col gap-2.5 text-[10px] text-slate-650 bg-slate-50/60 border border-slate-100/40 p-3 rounded-2xl">
+          <!-- Teacher -->
+          <div class="flex items-center gap-2.5">
+            <div class="w-6 h-6 rounded-full overflow-hidden border border-slate-200 bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
               <img *ngIf="getTeacherAvatar(session.teacherId)" [src]="getTeacherAvatar(session.teacherId)" class="w-full h-full object-cover" />
-              <span *ngIf="!getTeacherAvatar(session.teacherId)" class="text-[7px] font-extrabold" [style.color]="getTeacherColor(session.teacherId)">
+              <span *ngIf="!getTeacherAvatar(session.teacherId)" class="text-[8px] font-black" [style.color]="getTeacherColor(session.teacherId)">
                 {{ getTeacherInitials(session.teacherId) }}
               </span>
             </div>
             <div class="flex flex-col min-w-0">
-              <span class="text-[8px] text-slate-400 font-bold leading-none uppercase">Teacher</span>
-              <span class="font-bold text-slate-700 mt-0.5 truncate">{{ getTeacherName(session.teacherId) }}</span>
+              <span class="text-[7.5px] text-slate-450 font-black leading-none uppercase tracking-wider">Teacher</span>
+              <span class="font-extrabold text-slate-700 mt-0.5 truncate leading-none">{{ getTeacherName(session.teacherId) }}</span>
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <div [style.background-color]="getTeacherColor(session.teacherId) + '15'" class="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0">
-              <mat-icon class="text-xs w-3 h-3 flex items-center justify-center" [style.color]="getTeacherColor(session.teacherId)">room</mat-icon>
+          <!-- Classroom -->
+          <div class="flex items-center gap-2.5">
+            <div [style.background-color]="getTeacherColor(session.teacherId) + '12'" class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-100 bg-white shadow-sm">
+              <mat-icon class="text-[11px] w-3 h-3 flex items-center justify-center" [style.color]="getTeacherColor(session.teacherId)">room</mat-icon>
             </div>
             <div class="flex flex-col min-w-0">
-              <span class="text-[8px] text-slate-400 font-bold leading-none uppercase">Classroom</span>
-              <span class="font-bold text-slate-700 mt-0.5 truncate">{{ getRoomName(session.roomId!) }}</span>
+              <span class="text-[7.5px] text-slate-450 font-black leading-none uppercase tracking-wider">Classroom</span>
+              <span class="font-extrabold text-slate-700 mt-0.5 truncate leading-none">{{ getRoomName(session.roomId!) }}</span>
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <div [style.background-color]="getTeacherColor(session.teacherId) + '15'" class="w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center">
-              <mat-icon class="text-xs w-3 h-3 flex items-center justify-center" [style.color]="getTeacherColor(session.teacherId)">today</mat-icon>
+          <!-- Day -->
+          <div class="flex items-center gap-2.5">
+            <div [style.background-color]="getTeacherColor(session.teacherId) + '12'" class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-100 bg-white shadow-sm">
+              <mat-icon class="text-[11px] w-3 h-3 flex items-center justify-center" [style.color]="getTeacherColor(session.teacherId)">today</mat-icon>
             </div>
             <div class="flex flex-col min-w-0">
-              <span class="text-[8px] text-slate-400 font-bold leading-none uppercase">Day</span>
-              <span class="font-bold text-slate-700 mt-0.5 truncate">{{ session.day }}</span>
+              <span class="text-[7.5px] text-slate-450 font-black leading-none uppercase tracking-wider">Day</span>
+              <span class="font-extrabold text-slate-700 mt-0.5 truncate leading-none">{{ session.day }}</span>
             </div>
           </div>
         </div>
 
         <!-- Action items list -->
-        <div class="flex flex-col gap-1 border-t border-slate-100 pt-2">
+        <div class="flex flex-col gap-1 border-t border-slate-100 pt-2.5">
           <button
             (click)="contextEdit(session)"
-            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 p-2 rounded-lg transition duration-150 cursor-pointer"
+            class="flex items-center gap-3 w-full text-left text-[11px] font-bold text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 p-1.5 rounded-xl transition duration-150 cursor-pointer group"
           >
-            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center text-slate-455">edit</mat-icon>
+            <div class="w-7 h-7 rounded-lg bg-blue-50/60 text-blue-650 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+              <mat-icon class="text-[14px] w-3.5 h-3.5 flex items-center justify-center">edit</mat-icon>
+            </div>
             <span>Edit Class Settings</span>
           </button>
 
           <button
             (click)="contextCopy(session)"
-            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-slate-700 hover:text-indigo-650 hover:bg-indigo-50/50 p-2 rounded-lg transition duration-150 cursor-pointer"
+            class="flex items-center gap-3 w-full text-left text-[11px] font-bold text-slate-700 hover:text-indigo-650 hover:bg-indigo-50/50 p-1.5 rounded-xl transition duration-150 cursor-pointer group"
           >
-            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center text-slate-455">content_copy</mat-icon>
+            <div class="w-7 h-7 rounded-lg bg-indigo-50/60 text-indigo-650 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-100 transition-colors">
+              <mat-icon class="text-[14px] w-3.5 h-3.5 flex items-center justify-center">content_copy</mat-icon>
+            </div>
             <span>Duplicate Class</span>
           </button>
 
           <button
             (click)="contextUnschedule(session)"
-            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-slate-700 hover:text-emerald-650 hover:bg-emerald-50/50 p-2 rounded-lg transition duration-150 cursor-pointer"
+            class="flex items-center gap-3 w-full text-left text-[11px] font-bold text-slate-700 hover:text-emerald-650 hover:bg-emerald-50/50 p-1.5 rounded-xl transition duration-150 cursor-pointer group"
           >
-            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center text-slate-455">archive</mat-icon>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50/60 text-emerald-650 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-100 transition-colors">
+              <mat-icon class="text-[14px] w-3.5 h-3.5 flex items-center justify-center">archive</mat-icon>
+            </div>
             <span>Move to Drafts</span>
           </button>
 
           <button
             (click)="contextDelete(session)"
-            class="flex items-center gap-2.5 w-full text-left text-[10px] font-bold text-red-650 hover:bg-red-50 p-2 rounded-lg transition duration-150 cursor-pointer"
+            class="flex items-center gap-3 w-full text-left text-[11px] font-bold text-red-650 hover:bg-red-50 p-1.5 rounded-xl transition duration-150 cursor-pointer group"
           >
-            <mat-icon class="text-sm w-4 h-4 flex items-center justify-center">delete</mat-icon>
+            <div class="w-7 h-7 rounded-lg bg-red-50/60 text-red-650 flex items-center justify-center flex-shrink-0 group-hover:bg-red-100 transition-colors">
+              <mat-icon class="text-[14px] w-3.5 h-3.5 flex items-center justify-center">delete</mat-icon>
+            </div>
             <span>Delete Session</span>
           </button>
         </div>
@@ -1074,7 +1090,14 @@ export class CalendarComponent implements OnInit {
     return layouts;
   });
 
-  constructor() {}
+  constructor() {
+    effect(() => {
+      const trigger = this.scheduleService.tourTriggerSignal();
+      if (trigger > 0) {
+        this.startTour();
+      }
+    });
+  }
 
   ngOnInit() {
     this.rebuildDropListIds();
@@ -1082,6 +1105,7 @@ export class CalendarComponent implements OnInit {
     setTimeout(() => {
       const tourCompleted = localStorage.getItem('scheduler_tour_completed');
       if (tourCompleted !== 'true') {
+        this.scheduleService.activeTabSignal.set(0); // Ensure they are on Scheduler tab
         this.startTour();
       }
     }, 1000);

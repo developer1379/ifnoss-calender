@@ -14,19 +14,26 @@
       </div>
     </div>
 
-    <!-- Live Status Badge -->
-    <div class="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[9px] font-extrabold text-emerald-700 uppercase tracking-wider">
-      <span class="relative flex h-1.5 w-1.5">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-      </span>
-      <span>Active Sync</span>
+    <!-- Live Status Badge & Tour Guide button -->
+    <div class="flex items-center gap-3">
+      <button (click)="startTour()" class="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100/80 px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+        <mat-icon class="text-blue-600 text-sm">help_outline</mat-icon>
+        <span>Take Tour</span>
+      </button>
+
+      <div class="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[9px] font-extrabold text-emerald-700 uppercase tracking-wider">
+        <span class="relative flex h-1.5 w-1.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+        </span>
+        <span>Active Sync</span>
+      </div>
     </div>
   </header>
 
   <!-- Main Container -->
   <main class="flex-grow w-full px-4 sm:px-6 py-6">
-    <mat-tab-group dynamicHeight animationDuration="200ms" class="theme-light-tabs bg-white/70 border border-white/60 backdrop-blur-xl rounded-2xl p-2 md:p-4 min-h-[600px] shadow-lg">
+    <mat-tab-group [selectedIndex]="activeTabSignal()" (selectedIndexChange)="activeTabSignal.set($event)" dynamicHeight animationDuration="200ms" class="theme-light-tabs bg-white/70 border border-white/60 backdrop-blur-xl rounded-2xl p-2 md:p-4 min-h-[600px] shadow-lg">
       
       <!-- Tab 1: Calendar Scheduler -->
       <mat-tab>
