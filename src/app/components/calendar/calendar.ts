@@ -738,23 +738,31 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   nextTourStep() {
-    const nextIdx = this.tourStepIdx() + 1;
-    if (nextIdx < this.totalSteps) {
-      this.tourStepIdx.set(nextIdx);
-      this.updateTourStep();
-    } else {
-      this.tourActive.set(false);
-      this.stopTourLoop();
-      localStorage.setItem('scheduler_tour_completed', 'true');
-      this.snackBar.open('Tour completed! You are ready to schedule.', 'Dismiss', { duration: 4000 });
+    try {
+      const nextIdx = this.tourStepIdx() + 1;
+      if (nextIdx < this.totalSteps) {
+        this.tourStepIdx.set(nextIdx);
+        this.updateTourStep();
+      } else {
+        this.tourActive.set(false);
+        this.stopTourLoop();
+        localStorage.setItem('scheduler_tour_completed', 'true');
+        this.snackBar.open('Tour completed! You are ready to schedule.', 'Dismiss', { duration: 4000 });
+      }
+    } catch (e: any) {
+      alert("Error in nextTourStep: " + e.message);
     }
   }
 
   prevTourStep() {
-    const prevIdx = this.tourStepIdx() - 1;
-    if (prevIdx >= 0) {
-      this.tourStepIdx.set(prevIdx);
-      this.updateTourStep();
+    try {
+      const prevIdx = this.tourStepIdx() - 1;
+      if (prevIdx >= 0) {
+        this.tourStepIdx.set(prevIdx);
+        this.updateTourStep();
+      }
+    } catch (e: any) {
+      alert("Error in prevTourStep: " + e.message);
     }
   }
 
@@ -782,95 +790,100 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   updateTourStep() {
-    const idx = this.tourStepIdx();
-    const step = TOUR_STEPS[idx];
-    const el = document.getElementById(step.elementId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+    try {
+      const idx = this.tourStepIdx();
+      const step = TOUR_STEPS[idx];
+      const el = document.getElementById(step.elementId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+      }
+      this.updateTourPosition();
+    } catch (e: any) {
+      alert("Error in updateTourStep: " + e.message);
     }
-    // Update position immediately and start/continue loop
-    this.updateTourPosition();
   }
 
-  updateTourPosition() {
-    const idx = this.tourStepIdx();
-    if (idx < 0 || idx >= this.totalSteps) return;
-    const step = TOUR_STEPS[idx];
-    const el = document.getElementById(step.elementId);
-    
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      
-      // If element has zero size (e.g. not rendered/hidden), center the tooltip
-      if (rect.width === 0 || rect.height === 0) {
-        this.centerTooltip();
-        return;
-      }
+  private hasAlertedError = false;
 
-      // Sticky header safety margin checks
-      const headerHeight = 70;
-      if (rect.top < headerHeight) {
-        // If element is behind header, hide the highlight box so it doesn't overlap header
-        this.tourStyle.set({
-          top: '0px',
-          left: '0px',
-          width: '0px',
-          height: '0px',
-          display: 'none'
+  updateTourPosition() {
+    try {
+      const idx = this.tourStepIdx();
+      if (idx < 0 || idx >= this.totalSteps) return;
+      const step = TOUR_STEPS[idx];
+      const el = document.getElementById(step.elementId);
+      
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        
+        if (rect.width === 0 || rect.height === 0) {
+          this.centerTooltip();
+          return;
+        }
+
+        const headerHeight = 70;
+        if (rect.top < headerHeight) {
+          this.tourStyle.set({
+            top: '0px',
+            left: '0px',
+            width: '0px',
+            height: '0px',
+            display: 'none'
+          });
+        } else {
+          this.tourStyle.set({
+            top: `${rect.top - 6}px`,
+            left: `${rect.left - 6}px`,
+            width: `${rect.width + 12}px`,
+            height: `${rect.height + 12}px`,
+            display: 'block'
+          });
+        }
+        
+        let tooltipTop = 0;
+        let tooltipLeft = 0;
+        const offset = 20;
+        const tooltipWidth = 320;
+        const tooltipHeight = 200;
+        
+        if (step.position === 'bottom') {
+          tooltipTop = rect.bottom + offset;
+          tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        } else if (step.position === 'top') {
+          tooltipTop = rect.top - tooltipHeight - offset;
+          tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        } else if (step.position === 'right') {
+          tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+          tooltipLeft = rect.right + offset;
+        } else if (step.position === 'left') {
+          tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+          tooltipLeft = rect.left - tooltipWidth - offset;
+        } else {
+          tooltipTop = window.innerHeight / 2 - tooltipHeight / 2;
+          tooltipLeft = window.innerWidth / 2 - tooltipWidth / 2;
+        }
+        
+        if (tooltipLeft < 10) tooltipLeft = 10;
+        if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
+          tooltipLeft = window.innerWidth - tooltipWidth - 10;
+        }
+        
+        if (tooltipTop < headerHeight + 5) tooltipTop = headerHeight + 5;
+        if (tooltipTop + tooltipHeight > window.innerHeight - 10) {
+          tooltipTop = window.innerHeight - tooltipHeight - 10;
+        }
+        
+        this.tourTooltipStyle.set({
+          top: `${tooltipTop}px`,
+          left: `${tooltipLeft}px`
         });
       } else {
-        // Spotlight rectangle styles
-        this.tourStyle.set({
-          top: `${rect.top - 6}px`,
-          left: `${rect.left - 6}px`,
-          width: `${rect.width + 12}px`,
-          height: `${rect.height + 12}px`,
-          display: 'block'
-        });
+        this.centerTooltip();
       }
-      
-      // Tooltip balloon placement
-      let tooltipTop = 0;
-      let tooltipLeft = 0;
-      const offset = 20;
-      const tooltipWidth = 320;
-      const tooltipHeight = 200;
-      
-      if (step.position === 'bottom') {
-        tooltipTop = rect.bottom + offset;
-        tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
-      } else if (step.position === 'top') {
-        tooltipTop = rect.top - tooltipHeight - offset;
-        tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
-      } else if (step.position === 'right') {
-        tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
-        tooltipLeft = rect.right + offset;
-      } else if (step.position === 'left') {
-        tooltipTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
-        tooltipLeft = rect.left - tooltipWidth - offset;
-      } else {
-        tooltipTop = window.innerHeight / 2 - tooltipHeight / 2;
-        tooltipLeft = window.innerWidth / 2 - tooltipWidth / 2;
+    } catch (e: any) {
+      if (!this.hasAlertedError) {
+        this.hasAlertedError = true;
+        alert("Error in updateTourPosition: " + e.message);
       }
-      
-      // Bound checks to keep tooltip inside viewport
-      if (tooltipLeft < 10) tooltipLeft = 10;
-      if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
-        tooltipLeft = window.innerWidth - tooltipWidth - 10;
-      }
-      
-      // Clamp tooltip below header safety boundary
-      if (tooltipTop < headerHeight + 5) tooltipTop = headerHeight + 5;
-      if (tooltipTop + tooltipHeight > window.innerHeight - 10) {
-        tooltipTop = window.innerHeight - tooltipHeight - 10;
-      }
-      
-      this.tourTooltipStyle.set({
-        top: `${tooltipTop}px`,
-        left: `${tooltipLeft}px`
-      });
-    } else {
-      this.centerTooltip();
     }
   }
 
