@@ -3,25 +3,84 @@
   <div class="h-[3px] w-full bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-500 z-50"></div>
 
   <!-- Top Navigation Header -->
-  <header class="border-b border-slate-200/40 bg-white/75 backdrop-blur-md px-8 py-3 flex items-center justify-between sticky top-0 z-50 shadow-[0_2px_15px_-4px_rgba(15,23,42,0.04)]">
+  <header class="border-b border-slate-200/40 bg-white/75 backdrop-blur-md px-4 sm:px-8 py-3 flex flex-wrap md:flex-nowrap items-center justify-between sticky top-0 z-50 gap-4 shadow-[0_2px_15px_-4px_rgba(15,23,42,0.04)]">
+    <!-- Branding Logo -->
     <div class="flex items-center gap-3">
       <div class="w-9.5 h-9.5 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-500 flex items-center justify-center shadow-[0_3px_10px_rgba(37,99,235,0.2)] border border-blue-400/10 flex-shrink-0">
         <mat-icon class="text-white text-base" style="color: white !important;">auto_awesome</mat-icon>
       </div>
-      <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5">
-        <span class="text-sm font-black text-slate-800 tracking-tight leading-none">EduSchedule</span>
-        <span class="text-[8px] font-black text-blue-600 bg-blue-50 border border-blue-100/60 px-2 py-0.5 rounded-full uppercase tracking-widest leading-none self-start sm:self-auto">Conflict Detection Portal</span>
-      </div>
+      <span class="text-sm font-black text-slate-800 tracking-tight leading-none">EduSchedule</span>
     </div>
 
-    <!-- Live Status Badge & Tour Guide button -->
-    <div class="flex items-center gap-3">
-      <button (click)="startTour()" class="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100/80 px-3 py-1.5 rounded-lg cursor-pointer transition-all">
-        <mat-icon class="text-blue-600 text-sm">help_outline</mat-icon>
-        <span>Take Tour</span>
+    <!-- Header Navigation Tabs -->
+    <nav class="flex items-center gap-1 bg-slate-100/60 p-1 rounded-xl border border-slate-200/30 overflow-x-auto max-w-full order-3 md:order-none w-full md:w-auto scrollbar-none justify-center">
+      <button (click)="activeTabSignal.set(0)"
+         [class.bg-white]="activeTabSignal() === 0"
+         [class.text-blue-600]="activeTabSignal() === 0"
+         [class.shadow-sm]="activeTabSignal() === 0"
+         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer text-slate-650 hover:text-slate-850 bg-transparent select-none whitespace-nowrap">
+        <mat-icon class="text-base" [class.text-blue-600]="activeTabSignal() === 0" style="font-size: 16px; width: 16px; height: 16px;">grid_on</mat-icon>
+        <span class="hidden sm:inline">Scheduler Grid</span>
+        <span class="sm:hidden">Grid</span>
+      </button>
+      <button (click)="activeTabSignal.set(1)"
+         [class.bg-white]="activeTabSignal() === 1"
+         [class.text-blue-600]="activeTabSignal() === 1"
+         [class.shadow-sm]="activeTabSignal() === 1"
+         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer text-slate-650 hover:text-slate-850 bg-transparent select-none whitespace-nowrap">
+        <mat-icon class="text-base" [class.text-blue-600]="activeTabSignal() === 1" style="font-size: 16px; width: 16px; height: 16px;">people</mat-icon>
+        <span>Teachers</span>
+      </button>
+      <button (click)="activeTabSignal.set(2)"
+         [class.bg-white]="activeTabSignal() === 2"
+         [class.text-blue-600]="activeTabSignal() === 2"
+         [class.shadow-sm]="activeTabSignal() === 2"
+         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer text-slate-650 hover:text-slate-850 bg-transparent select-none whitespace-nowrap">
+        <mat-icon class="text-base" [class.text-blue-600]="activeTabSignal() === 2" style="font-size: 16px; width: 16px; height: 16px;">school</mat-icon>
+        <span>Courses</span>
+      </button>
+      <button (click)="activeTabSignal.set(3)"
+         [class.bg-white]="activeTabSignal() === 3"
+         [class.text-blue-600]="activeTabSignal() === 3"
+         [class.shadow-sm]="activeTabSignal() === 3"
+         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer text-slate-650 hover:text-slate-850 bg-transparent select-none whitespace-nowrap">
+        <mat-icon class="text-base" [class.text-blue-600]="activeTabSignal() === 3" style="font-size: 16px; width: 16px; height: 16px;">meeting_room</mat-icon>
+        <span class="hidden sm:inline">Classrooms</span>
+        <span class="sm:hidden">Rooms</span>
+      </button>
+    </nav>
+
+    <!-- Live Status Badge, Tour Guide & API Portal link & Quick Actions -->
+    <div class="flex items-center gap-2.5 order-2 md:order-none flex-wrap sm:flex-nowrap justify-end">
+      <!-- Quick Actions -->
+      <button (click)="openAddClass()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all border-0 shadow-sm" title="Add Class">
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
+        <span class="hidden sm:inline">Add Class</span>
       </button>
 
-      <div class="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[9px] font-extrabold text-emerald-700 uppercase tracking-wider">
+      <button (click)="openAddTeacher()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all border-0 shadow-sm" title="Add Teacher">
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">person_add</mat-icon>
+        <span class="hidden sm:inline">Add Teacher</span>
+      </button>
+
+      <button (click)="openAddCourse()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all border-0 shadow-sm" title="Add Course">
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">library_add</mat-icon>
+        <span class="hidden sm:inline">Add Course</span>
+      </button>
+
+      <span class="text-slate-200 mx-0.5 select-none hidden md:inline">|</span>
+
+      <a [href]="apiBaseUrl" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-xs font-bold text-slate-650 hover:text-slate-800 hover:bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-lg cursor-pointer transition-all no-underline" title="API Portal">
+        <mat-icon class="text-slate-500 text-sm">api</mat-icon>
+        <span class="hidden sm:inline">API Portal</span>
+      </a>
+
+      <button (click)="startTour()" class="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 border border-blue-100/80 px-3 py-1.5 rounded-lg cursor-pointer transition-all" title="Take Tour">
+        <mat-icon class="text-blue-600 text-sm">help_outline</mat-icon>
+        <span class="hidden sm:inline">Take Tour</span>
+      </button>
+
+      <div class="hidden xl:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[9px] font-extrabold text-emerald-700 uppercase tracking-wider">
         <span class="relative flex h-1.5 w-1.5">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
@@ -33,61 +92,22 @@
 
   <!-- Main Container -->
   <main class="flex-grow w-full px-4 sm:px-6 py-6">
-    <mat-tab-group [selectedIndex]="activeTabSignal()" (selectedIndexChange)="activeTabSignal.set($event)" dynamicHeight animationDuration="200ms" class="theme-light-tabs bg-white/70 border border-white/60 backdrop-blur-xl rounded-2xl p-2 md:p-4 min-h-[600px] shadow-lg">
-      
-      <!-- Tab 1: Calendar Scheduler -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <div class="flex items-center gap-2 py-2">
-            <mat-icon class="text-blue-600 text-lg">grid_on</mat-icon>
-            <span class="font-bold text-xs uppercase tracking-wider">Scheduler Grid</span>
-          </div>
-        </ng-template>
-        <div class="pt-4 h-full">
+    <div class="bg-white/70 border border-white/60 backdrop-blur-xl rounded-2xl p-4 md:p-6 min-h-[600px] shadow-lg">
+      @switch (activeTabSignal()) {
+        @case (0) {
           <app-calendar></app-calendar>
-        </div>
-      </mat-tab>
-
-      <!-- Tab 2: Teachers -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <div class="flex items-center gap-2 py-2">
-            <mat-icon class="text-blue-600 text-lg">people</mat-icon>
-            <span class="font-bold text-xs uppercase tracking-wider">Teachers</span>
-          </div>
-        </ng-template>
-        <div class="pt-4 h-full">
+        }
+        @case (1) {
           <app-teachers></app-teachers>
-        </div>
-      </mat-tab>
-
-      <!-- Tab 3: Courses -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <div class="flex items-center gap-2 py-2">
-            <mat-icon class="text-blue-600 text-lg">school</mat-icon>
-            <span class="font-bold text-xs uppercase tracking-wider">Courses</span>
-          </div>
-        </ng-template>
-        <div class="pt-4 h-full">
+        }
+        @case (2) {
           <app-courses></app-courses>
-        </div>
-      </mat-tab>
-
-      <!-- Tab 4: Rooms -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <div class="flex items-center gap-2 py-2">
-            <mat-icon class="text-blue-600 text-lg">meeting_room</mat-icon>
-            <span class="font-bold text-xs uppercase tracking-wider">Classrooms</span>
-          </div>
-        </ng-template>
-        <div class="pt-4 h-full">
+        }
+        @case (3) {
           <app-rooms></app-rooms>
-        </div>
-      </mat-tab>
-
-    </mat-tab-group>
+        }
+      }
+    </div>
   </main>
 
   <!-- Footer -->

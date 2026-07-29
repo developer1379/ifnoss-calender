@@ -1,10 +1,11 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  FormsModule,
 } from '@angular/forms';
 import {
   MatDialogRef,
@@ -387,6 +388,7 @@ export class RoomDialog implements OnInit {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -404,10 +406,20 @@ export class RoomDialog implements OnInit {
         <!-- Course Selection -->
         <mat-form-field appearance="outline" class="w-full theme-light-input">
           <mat-label class="text-slate-500">Course / Class</mat-label>
-          <mat-select formControlName="courseId" class="text-slate-800">
-            <mat-option *ngFor="let c of courses" [value]="c.id" class="light-option">
+          <mat-select formControlName="courseId" class="text-slate-800" (openedChange)="onCourseOpened($event)">
+            <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <input type="text"
+                     [ngModel]="courseFilter()"
+                     (ngModelChange)="courseFilter.set($event)"
+                     [ngModelOptions]="{standalone: true}"
+                     placeholder="Search Course..."
+                     class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                     (keydown)="$event.stopPropagation()" />
+            </div>
+            <mat-option *ngFor="let c of filteredCourses()" [value]="c.id" class="light-option">
               {{ c.code }} - {{ c.name }} (Enrolled: {{ c.enrolledStudents }})
             </mat-option>
+            <mat-option *ngIf="filteredCourses().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No courses found</mat-option>
           </mat-select>
           <mat-error *ngIf="form.get('courseId')?.hasError('required')">Course is required</mat-error>
         </mat-form-field>
@@ -415,10 +427,20 @@ export class RoomDialog implements OnInit {
         <!-- Teacher Selection -->
         <mat-form-field appearance="outline" class="w-full theme-light-input">
           <mat-label class="text-slate-500">Teacher</mat-label>
-          <mat-select formControlName="teacherId" class="text-slate-800">
-            <mat-option *ngFor="let t of teachers" [value]="t.id" class="light-option">
+          <mat-select formControlName="teacherId" class="text-slate-800" (openedChange)="onTeacherOpened($event)">
+            <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <input type="text"
+                     [ngModel]="teacherFilter()"
+                     (ngModelChange)="teacherFilter.set($event)"
+                     [ngModelOptions]="{standalone: true}"
+                     placeholder="Search Teacher..."
+                     class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                     (keydown)="$event.stopPropagation()" />
+            </div>
+            <mat-option *ngFor="let t of filteredTeachers()" [value]="t.id" class="light-option">
               {{ t.name }} ({{ t.department }})
             </mat-option>
+            <mat-option *ngIf="filteredTeachers().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No teachers found</mat-option>
           </mat-select>
           <mat-error *ngIf="form.get('teacherId')?.hasError('required')">Teacher is required</mat-error>
         </mat-form-field>
@@ -426,10 +448,20 @@ export class RoomDialog implements OnInit {
         <!-- Classroom Selection -->
         <mat-form-field appearance="outline" class="w-full theme-light-input">
           <mat-label class="text-slate-500">Room</mat-label>
-          <mat-select formControlName="roomId" class="text-slate-800">
-            <mat-option *ngFor="let r of rooms" [value]="r.id" class="light-option">
+          <mat-select formControlName="roomId" class="text-slate-800" (openedChange)="onRoomOpened($event)">
+            <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <input type="text"
+                     [ngModel]="roomFilter()"
+                     (ngModelChange)="roomFilter.set($event)"
+                     [ngModelOptions]="{standalone: true}"
+                     placeholder="Search Room..."
+                     class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                     (keydown)="$event.stopPropagation()" />
+            </div>
+            <mat-option *ngFor="let r of filteredRooms()" [value]="r.id" class="light-option">
               {{ r.name }} (Cap: {{ r.capacity }} - {{ r.type }})
             </mat-option>
+            <mat-option *ngIf="filteredRooms().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No classrooms found</mat-option>
           </mat-select>
           <mat-error *ngIf="form.get('roomId')?.hasError('required')">Room is required</mat-error>
         </mat-form-field>
@@ -517,6 +549,46 @@ export class ScheduleDialog implements OnInit {
   capacityWarning: string | null = null;
   isEditMode = false;
 
+  courseFilter = signal('');
+  teacherFilter = signal('');
+  roomFilter = signal('');
+
+  filteredCourses = computed(() => {
+    const q = this.courseFilter().toLowerCase().trim();
+    if (!q) return this.courses;
+    return this.courses.filter(
+      (c) => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+    );
+  });
+
+  filteredTeachers = computed(() => {
+    const q = this.teacherFilter().toLowerCase().trim();
+    if (!q) return this.teachers;
+    return this.teachers.filter(
+      (t) => t.name.toLowerCase().includes(q) || t.department.toLowerCase().includes(q)
+    );
+  });
+
+  filteredRooms = computed(() => {
+    const q = this.roomFilter().toLowerCase().trim();
+    if (!q) return this.rooms;
+    return this.rooms.filter(
+      (r) => r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q)
+    );
+  });
+
+  onCourseOpened(opened: boolean) {
+    if (!opened) this.courseFilter.set('');
+  }
+
+  onTeacherOpened(opened: boolean) {
+    if (!opened) this.teacherFilter.set('');
+  }
+
+  onRoomOpened(opened: boolean) {
+    if (!opened) this.roomFilter.set('');
+  }
+
   constructor(
     private fb: FormBuilder,
     private scheduleService: ScheduleService,
@@ -525,15 +597,16 @@ export class ScheduleDialog implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isEditMode = !!(this.data.session && this.data.session.day && this.data.session.roomId);
+    const safeData = this.data || { session: null, defaultDay: undefined, defaultTime: undefined };
+    this.isEditMode = !!(safeData.session && safeData.session.day && safeData.session.roomId);
     this.teachers = this.scheduleService.teachers();
     this.courses = this.scheduleService.courses();
     this.rooms = this.scheduleService.rooms();
 
     let start = '09:00';
     let end = '10:30';
-    if (this.data.defaultTime) {
-      start = this.data.defaultTime;
+    if (safeData.defaultTime) {
+      start = safeData.defaultTime;
       const [h, m] = start.split(':').map(Number);
       const endH = h + 1;
       const endM = m + 30;
@@ -543,12 +616,12 @@ export class ScheduleDialog implements OnInit {
     }
 
     this.form = this.fb.group({
-      courseId: [this.data.session?.courseId || '', Validators.required],
-      teacherId: [this.data.session?.teacherId || '', Validators.required],
-      roomId: [this.data.session?.roomId || '', Validators.required],
-      day: [this.data.session?.day || this.data.defaultDay || 'Monday', Validators.required],
-      startTime: [this.data.session?.startTime || start, Validators.required],
-      endTime: [this.data.session?.endTime || end, Validators.required],
+      courseId: [safeData.session?.courseId || '', Validators.required],
+      teacherId: [safeData.session?.teacherId || '', Validators.required],
+      roomId: [safeData.session?.roomId || '', Validators.required],
+      day: [safeData.session?.day || safeData.defaultDay || 'Monday', Validators.required],
+      startTime: [safeData.session?.startTime || start, Validators.required],
+      endTime: [safeData.session?.endTime || end, Validators.required],
     });
 
     this.form.valueChanges.subscribe((val) => {
@@ -556,7 +629,7 @@ export class ScheduleDialog implements OnInit {
       this.checkRoomCapacity(val);
     });
 
-    if (this.data.session) {
+    if (safeData.session) {
       this.checkLocalConflicts(this.form.value);
       this.checkRoomCapacity(this.form.value);
     }

@@ -57,7 +57,7 @@ export interface CapacityWarning {
 })
 export class ScheduleService {
   private readonly http = inject(HttpClient);
-  private readonly API_BASE = 'https://blueviolet-pony-257143.hostingersite.com';
+  readonly API_BASE = 'https://blueviolet-pony-257143.hostingersite.com';
 
   // Shared UI signals
   activeTabSignal = signal<number>(0);

@@ -129,116 +129,130 @@ const TOUR_STEPS: TourStep[] = [
       </div>
 
       <!-- Filters, Add button & Exports Toolbar -->
-      <div class="bg-white/70 border border-white/60 backdrop-blur-xl p-4 rounded-xl flex flex-wrap items-center justify-between gap-4 shadow-sm flex-shrink-0">
-        <div class="flex flex-wrap items-center gap-3">
-          <span class="text-[10px] font-extrabold text-slate-450 flex items-center gap-1 mr-2 uppercase tracking-wider">
-            <mat-icon class="text-slate-400 text-sm">filter_alt</mat-icon> Filters:
-          </span>
+      <div class="bg-white/70 border border-white/60 backdrop-blur-xl p-3 rounded-xl flex flex-wrap items-center gap-2.5 shadow-sm flex-shrink-0">
+        <span class="text-[10px] font-extrabold text-slate-450 flex items-center gap-1 mr-1 uppercase tracking-wider">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-slate-450">filter_alt</mat-icon> Filters:
+        </span>
 
-          <!-- Search Box -->
-          <div class="relative w-48">
-            <input
-              [ngModel]="searchQuery()"
-              (ngModelChange)="searchQuery.set($event)"
-              type="text"
-              placeholder="Search code, teacher, room..."
-              class="text-xs bg-white border border-slate-200 rounded-lg py-2 pl-8 pr-3 w-full text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <mat-icon class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm w-4 h-4 flex items-center justify-center">search</mat-icon>
-          </div>
-
-          <!-- Day Filter -->
-          <div class="relative w-36">
-            <select
-              [ngModel]="selectedDayFilter()"
-              (ngModelChange)="selectedDayFilter.set($event)"
-              class="text-xs bg-white border border-slate-200 rounded-lg py-2 px-3 pr-8 w-full text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option [ngValue]="null">All Days</option>
-              <option *ngFor="let d of days" [value]="d">{{ d }}</option>
-            </select>
-            <mat-icon class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm w-4 h-4 flex items-center justify-center">keyboard_arrow_down</mat-icon>
-          </div>
-
-          <!-- Teacher Filter -->
-          <div class="relative w-40">
-            <select
-              [ngModel]="selectedTeacherFilter()"
-              (ngModelChange)="selectedTeacherFilter.set($event)"
-              class="text-xs bg-white border border-slate-200 rounded-lg py-2 px-3 pr-8 w-full text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option [ngValue]="null">All Teachers</option>
-              <option *ngFor="let t of teachers()" [value]="t.id">{{ t.name }}</option>
-            </select>
-            <mat-icon class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm w-4 h-4 flex items-center justify-center">keyboard_arrow_down</mat-icon>
-          </div>
-
-          <!-- Room Filter -->
-          <div class="relative w-40">
-            <select
-              [ngModel]="selectedRoomFilter()"
-              (ngModelChange)="selectedRoomFilter.set($event)"
-              class="text-xs bg-white border border-slate-200 rounded-lg py-2 px-3 pr-8 w-full text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option [ngValue]="null">All Classrooms</option>
-              <option *ngFor="let r of rooms()" [value]="r.id">{{ r.name }}</option>
-            </select>
-            <mat-icon class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm w-4 h-4 flex items-center justify-center">keyboard_arrow_down</mat-icon>
-          </div>
-
-          <!-- Course Filter -->
-          <div class="relative w-40">
-            <select
-              [ngModel]="selectedCourseFilter()"
-              (ngModelChange)="selectedCourseFilter.set($event)"
-              class="text-xs bg-white border border-slate-200 rounded-lg py-2 px-3 pr-8 w-full text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option [ngValue]="null">All Courses</option>
-              <option *ngFor="let c of courses()" [value]="c.id">{{ c.code }} - {{ c.name }}</option>
-            </select>
-            <mat-icon class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm w-4 h-4 flex items-center justify-center">keyboard_arrow_down</mat-icon>
-          </div>
-
-          <!-- Conflicts Toggle -->
-          <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg py-1.5 px-3 select-none hover:bg-slate-50 transition-colors">
-            <input
-              type="checkbox"
-              [ngModel]="conflictsOnlyFilter()"
-              (ngModelChange)="conflictsOnlyFilter.set($event)"
-              class="rounded border-slate-350 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
-            />
-            <span>Conflicts Only</span>
-          </label>
-
-          <!-- Clear Filters -->
-          <button *ngIf="hasActiveFilters()" (click)="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer transition-colors px-2 py-1">
-            Clear Filters
-          </button>
+        <!-- Search Box -->
+        <div class="relative w-40 flex-shrink-0">
+          <input
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            type="text"
+            placeholder="Search code, teacher, room..."
+            class="text-xs bg-white border border-slate-200 rounded-lg py-1.5 pl-8 pr-3 w-full text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5 flex items-center justify-center">search</mat-icon>
         </div>
 
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <!-- Reset and Clear option buttons -->
-          <button (click)="resetDatabase()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer transition-colors" title="Reset system mock database">
-            <mat-icon class="text-slate-500 text-sm">refresh</mat-icon> Reset DB
-          </button>
-          <button (click)="clearAllSchedules()" class="text-xs border border-red-200/50 text-red-650 hover:bg-red-50/50 font-bold px-3 py-2 rounded-lg flex items-center gap-1 cursor-pointer transition-colors" title="Move all scheduled classes back to drafts">
-            <mat-icon class="text-red-500 text-sm">clear_all</mat-icon> Clear Grid
-          </button>
+        <!-- Day Filter -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-28 theme-light-select select-xs flex-shrink-0">
+          <mat-select [ngModel]="selectedDayFilter()" (ngModelChange)="selectedDayFilter.set($event)" placeholder="All Days">
+            <mat-option [value]="null">All Days</mat-option>
+            <mat-option *ngFor="let d of days" [value]="d">{{ d }}</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-          <span class="w-[1px] h-6 bg-slate-200 mx-1"></span>
+        <!-- Teacher Filter -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-36 theme-light-select select-xs flex-shrink-0">
+          <mat-select [ngModel]="selectedTeacherFilter()" (ngModelChange)="selectedTeacherFilter.set($event)" (openedChange)="onTeacherOpened($event)" placeholder="All Teachers">
+            <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <input type="text"
+                     [ngModel]="teacherFilter()"
+                     (ngModelChange)="teacherFilter.set($event)"
+                     [ngModelOptions]="{standalone: true}"
+                     placeholder="Search Teacher..."
+                     class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                     (keydown)="$event.stopPropagation()" />
+            </div>
+            <mat-option [value]="null">All Teachers</mat-option>
+            <mat-option *ngFor="let t of filteredTeachers()" [value]="t.id" class="light-option">
+              {{ t.name }}
+            </mat-option>
+            <mat-option *ngIf="filteredTeachers().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No teachers found</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-          <!-- Export buttons -->
-          <button (click)="exportToJSON()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors" title="Export JSON file">
-            <mat-icon class="text-slate-500 text-sm">download</mat-icon> Export JSON
-          </button>
-          <button (click)="exportToCSV()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors" title="Export CSV spreadsheet">
-            <mat-icon class="text-slate-500 text-sm">table_view</mat-icon> Export CSV
-          </button>
-          
-          <button (click)="openScheduleDialog()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer shadow transition-all hover:shadow-md ml-1">
-            <mat-icon class="text-sm">add</mat-icon> Schedule Class
-          </button>
-        </div>
+        <!-- Room Filter -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-36 theme-light-select select-xs flex-shrink-0">
+          <mat-select [ngModel]="selectedRoomFilter()" (ngModelChange)="selectedRoomFilter.set($event)" (openedChange)="onRoomOpened($event)" placeholder="All Classrooms">
+            <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <input type="text"
+                     [ngModel]="roomFilter()"
+                     (ngModelChange)="roomFilter.set($event)"
+                     [ngModelOptions]="{standalone: true}"
+                     placeholder="Search Room..."
+                     class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                     (keydown)="$event.stopPropagation()" />
+            </div>
+            <mat-option [value]="null">All Classrooms</mat-option>
+            <mat-option *ngFor="let r of filteredRooms()" [value]="r.id" class="light-option">
+              {{ r.name }}
+            </mat-option>
+            <mat-option *ngIf="filteredRooms().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No classrooms found</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Course Filter -->
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-36 theme-light-select select-xs flex-shrink-0">
+          <mat-select [ngModel]="selectedCourseFilter()" (ngModelChange)="selectedCourseFilter.set($event)" (openedChange)="onCourseOpened($event)" placeholder="All Courses">
+            <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <input type="text"
+                     [ngModel]="courseFilter()"
+                     (ngModelChange)="courseFilter.set($event)"
+                     [ngModelOptions]="{standalone: true}"
+                     placeholder="Search Course..."
+                     class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                     (keydown)="$event.stopPropagation()" />
+            </div>
+            <mat-option [value]="null">All Courses</mat-option>
+            <mat-option *ngFor="let c of filteredCourses()" [value]="c.id" class="light-option">
+              {{ c.code }} - {{ c.name }}
+            </mat-option>
+            <mat-option *ngIf="filteredCourses().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No courses found</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Conflicts Toggle -->
+        <label class="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 select-none hover:bg-slate-50 transition-colors flex-shrink-0">
+          <input
+            type="checkbox"
+            [ngModel]="conflictsOnlyFilter()"
+            (ngModelChange)="conflictsOnlyFilter.set($event)"
+            class="rounded border-slate-350 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+          />
+          <span class="text-[11px] font-bold">Conflicts & Alerts</span>
+        </label>
+
+        <!-- Clear Filters -->
+        <button *ngIf="hasActiveFilters()" (click)="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer transition-colors px-2 py-1 flex-shrink-0">
+          Clear Filters
+        </button>
+
+        <span class="w-[1px] h-6 bg-slate-200 mx-1 flex-shrink-0"></span>
+
+        <!-- Reset and Clear option buttons -->
+        <button (click)="resetDatabase()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer transition-colors flex-shrink-0" title="Reset system mock database">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-slate-500">refresh</mat-icon> Reset DB
+        </button>
+        <button (click)="clearAllSchedules()" class="text-xs border border-red-200/50 text-red-650 hover:bg-red-50/50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer transition-colors flex-shrink-0" title="Move all scheduled classes back to drafts">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-red-500">clear_all</mat-icon> Clear Grid
+        </button>
+
+        <span class="w-[1px] h-6 bg-slate-200 mx-1 flex-shrink-0"></span>
+
+        <!-- Export buttons -->
+        <button (click)="exportToJSON()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors flex-shrink-0" title="Export JSON file">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-slate-500">download</mat-icon> Export JSON
+        </button>
+        <button (click)="exportToCSV()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors flex-shrink-0" title="Export CSV spreadsheet">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-slate-500">table_view</mat-icon> Export CSV
+        </button>
+        
+        <button (click)="openScheduleDialog()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow transition-all hover:shadow-md flex-shrink-0 ml-auto">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">add</mat-icon> Schedule Class
+        </button>
       </div>
 
       <!-- Main Drag and Drop Workspace Layout: Drafts Panel + Calendar Grid + Conflicts Panel -->
@@ -257,14 +271,41 @@ const TOUR_STEPS: TourStep[] = [
           <!-- Quick Inline Draft Builder Form -->
           <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col gap-2">
             <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Quick Draft Builder</div>
-            <select [(ngModel)]="newDraftCourseId" class="text-xs bg-white border border-slate-200 rounded-lg p-2 w-full text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-              <option value="" disabled selected>Select Course</option>
-              <option *ngFor="let c of courses()" [value]="c.id">{{ c.code }} - {{ c.name }}</option>
-            </select>
-            <select [(ngModel)]="newDraftTeacherId" class="text-xs bg-white border border-slate-200 rounded-lg p-2 w-full text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
-              <option value="" disabled selected>Select Teacher</option>
-              <option *ngFor="let t of teachers()" [value]="t.id">{{ t.name }}</option>
-            </select>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full theme-light-select select-xs">
+              <mat-select [(ngModel)]="newDraftCourseId" (openedChange)="onDraftCourseOpened($event)" placeholder="Select Course">
+                <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+                  <input type="text"
+                         [ngModel]="draftCourseFilter()"
+                         (ngModelChange)="draftCourseFilter.set($event)"
+                         [ngModelOptions]="{standalone: true}"
+                         placeholder="Search Course..."
+                         class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                         (keydown)="$event.stopPropagation()" />
+                </div>
+                <mat-option *ngFor="let c of filteredDraftCourses()" [value]="c.id" class="light-option">
+                  {{ c.code }} - {{ c.name }}
+                </mat-option>
+                <mat-option *ngIf="filteredDraftCourses().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No courses found</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full theme-light-select select-xs">
+              <mat-select [(ngModel)]="newDraftTeacherId" (openedChange)="onDraftTeacherOpened($event)" placeholder="Select Teacher">
+                <div class="px-3 py-2 border-b border-slate-100 sticky top-0 bg-white z-10">
+                  <input type="text"
+                         [ngModel]="draftTeacherFilter()"
+                         (ngModelChange)="draftTeacherFilter.set($event)"
+                         [ngModelOptions]="{standalone: true}"
+                         placeholder="Search Teacher..."
+                         class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-700 font-semibold"
+                         (keydown)="$event.stopPropagation()" />
+                </div>
+                <mat-option *ngFor="let t of filteredDraftTeachers()" [value]="t.id" class="light-option">
+                  {{ t.name }}
+                </mat-option>
+                <mat-option *ngIf="filteredDraftTeachers().length === 0" disabled class="text-slate-400 text-xs text-center py-2">No teachers found</mat-option>
+              </mat-select>
+            </mat-form-field>
             <button (click)="createDraft()" [disabled]="!newDraftCourseId || !newDraftTeacherId" class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-[10px] uppercase py-2 rounded-lg transition cursor-pointer">
               + Create Draft
             </button>
@@ -664,35 +705,78 @@ const TOUR_STEPS: TourStep[] = [
     </div>
   `,
   styles: [`
-    ::ng-deep .theme-light-select .mat-mdc-text-field-wrapper {
-      background-color: #F8FAFC !important; /* bg-slate-50 */
-      border-radius: 8px !important;
-      height: 40px !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
+    ::ng-deep .theme-light-select.mat-mdc-form-field {
+      margin-bottom: 0 !important;
+      display: inline-flex !important;
+      vertical-align: middle !important;
+      font-size: 12px !important;
     }
-    ::ng-deep .theme-light-select .mdc-text-field--outlined .mdc-notched-outline__leading,
-    ::ng-deep .theme-light-select .mdc-text-field--outlined .mdc-notched-outline__notch,
-    ::ng-deep .theme-light-select .mdc-text-field--outlined .mdc-notched-outline__trailing {
-      border-color: #E2E8F0 !important; /* slate-200 */
+    ::ng-deep .theme-light-select .mat-mdc-text-field-wrapper {
+      background-color: #ffffff !important; /* white bg like native */
+      border-radius: 8px !important;
+      height: 34px !important; /* 34px compact height like native */
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    ::ng-deep .theme-light-select .mdc-notched-outline__leading,
+    ::ng-deep .theme-light-select .mdc-notched-outline__notch,
+    ::ng-deep .theme-light-select .mdc-notched-outline__trailing {
+      border-color: #E2E8F0 !important; /* slate-200 border */
+      border-width: 1px !important;
+    }
+    ::ng-deep .theme-light-select:hover .mdc-notched-outline__leading,
+    ::ng-deep .theme-light-select:hover .mdc-notched-outline__notch,
+    ::ng-deep .theme-light-select:hover .mdc-notched-outline__trailing {
+      border-color: #CBD5E1 !important; /* slate-300 on hover */
+    }
+    ::ng-deep .theme-light-select.mat-form-field-focused .mdc-notched-outline__leading,
+    ::ng-deep .theme-light-select.mat-form-field-focused .mdc-notched-outline__notch,
+    ::ng-deep .theme-light-select.mat-form-field-focused .mdc-notched-outline__trailing {
+      border-color: #3B82F6 !important; /* blue-500 on focus */
+      border-width: 1.5px !important;
     }
     ::ng-deep .theme-light-select .mat-mdc-form-field-flex {
-      height: 40px !important;
+      height: 34px !important;
       align-items: center !important;
     }
     ::ng-deep .theme-light-select .mat-mdc-form-field-infix {
-      padding-top: 8px !important;
-      padding-bottom: 8px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      min-height: auto !important;
+      display: flex !important;
+      align-items: center !important;
     }
     ::ng-deep .theme-light-select .mat-mdc-select-value {
-      color: #1E293B !important;
+      color: #334155 !important; /* slate-700 */
+      font-weight: 600 !important; /* semibold */
+      font-size: 12px !important;
+    }
+    ::ng-deep .theme-light-select .mat-mdc-select-arrow {
+      width: 16px !important;
+      height: 16px !important;
     }
     ::ng-deep .theme-light-select .mat-mdc-select-arrow svg {
-      fill: #64748B !important;
+      fill: #94A3B8 !important; /* slate-400 */
+      width: 16px !important;
+      height: 16px !important;
+    }
+    ::ng-deep .mat-mdc-select-panel .mat-mdc-option {
+      min-height: 32px !important;
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+    }
+    ::ng-deep .mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
     }
     .light-option {
       background-color: #FFFFFF !important;
-      color: #1E293B !important;
+      color: #334155 !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
     }
     .light-option:hover {
       background-color: #F1F5F9 !important;
@@ -916,6 +1000,74 @@ export class CalendarComponent implements OnInit, OnDestroy {
   // Inline draft builder states
   newDraftCourseId = '';
   newDraftTeacherId = '';
+
+  // Select filter query signals
+  courseFilter = signal('');
+  teacherFilter = signal('');
+  roomFilter = signal('');
+  draftCourseFilter = signal('');
+  draftTeacherFilter = signal('');
+
+  // Computed filtered collections
+  filteredCourses = computed(() => {
+    const q = this.courseFilter().toLowerCase().trim();
+    if (!q) return this.courses();
+    return this.courses().filter(
+      (c) => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+    );
+  });
+
+  filteredTeachers = computed(() => {
+    const q = this.teacherFilter().toLowerCase().trim();
+    if (!q) return this.teachers();
+    return this.teachers().filter(
+      (t) => t.name.toLowerCase().includes(q) || t.department.toLowerCase().includes(q)
+    );
+  });
+
+  filteredRooms = computed(() => {
+    const q = this.roomFilter().toLowerCase().trim();
+    if (!q) return this.rooms();
+    return this.rooms().filter(
+      (r) => r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q)
+    );
+  });
+
+  filteredDraftCourses = computed(() => {
+    const q = this.draftCourseFilter().toLowerCase().trim();
+    if (!q) return this.courses();
+    return this.courses().filter(
+      (c) => c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+    );
+  });
+
+  filteredDraftTeachers = computed(() => {
+    const q = this.draftTeacherFilter().toLowerCase().trim();
+    if (!q) return this.teachers();
+    return this.teachers().filter(
+      (t) => t.name.toLowerCase().includes(q) || t.department.toLowerCase().includes(q)
+    );
+  });
+
+  onCourseOpened(opened: boolean) {
+    if (!opened) this.courseFilter.set('');
+  }
+
+  onTeacherOpened(opened: boolean) {
+    if (!opened) this.teacherFilter.set('');
+  }
+
+  onRoomOpened(opened: boolean) {
+    if (!opened) this.roomFilter.set('');
+  }
+
+  onDraftCourseOpened(opened: boolean) {
+    if (!opened) this.draftCourseFilter.set('');
+  }
+
+  onDraftTeacherOpened(opened: boolean) {
+    if (!opened) this.draftTeacherFilter.set('');
+  }
 
   // CDK Drag & Drop Connected Identifiers list
   allDropListIds: string[] = [];
