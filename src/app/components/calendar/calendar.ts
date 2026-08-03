@@ -232,16 +232,6 @@ const TOUR_STEPS: TourStep[] = [
 
         <span class="w-[1px] h-6 bg-slate-200 mx-1 flex-shrink-0"></span>
 
-        <!-- Reset and Clear option buttons -->
-        <button (click)="resetDatabase()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer transition-colors flex-shrink-0" title="Reset system mock database">
-          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-slate-500">refresh</mat-icon> Reset DB
-        </button>
-        <button (click)="clearAllSchedules()" class="text-xs border border-red-200/50 text-red-650 hover:bg-red-50/50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer transition-colors flex-shrink-0" title="Move all scheduled classes back to drafts">
-          <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-red-500">clear_all</mat-icon> Clear Grid
-        </button>
-
-        <span class="w-[1px] h-6 bg-slate-200 mx-1 flex-shrink-0"></span>
-
         <!-- Export buttons -->
         <button (click)="exportToJSON()" class="text-xs border border-slate-200 text-slate-650 hover:bg-slate-50 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors flex-shrink-0" title="Export JSON file">
           <mat-icon style="font-size: 14px; width: 14px; height: 14px;" class="text-slate-500">download</mat-icon> Export JSON
