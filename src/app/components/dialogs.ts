@@ -39,7 +39,7 @@ export const COLOR_SWATCHES = [
   '#475569', // Slate
 ];
 
-const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // ==========================================
 // 1. TEACHER DIALOG

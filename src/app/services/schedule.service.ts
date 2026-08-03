@@ -33,7 +33,7 @@ export interface ScheduleSession {
   teacherId: string;
   courseId: string;
   roomId: string | null;
-  day: string | null; // Monday - Saturday or null for unscheduled draft
+  day: string | null; // Monday - Sunday or null for unscheduled draft
   startTime: string | null; // HH:MM or null
   endTime: string | null; // HH:MM or null
 }

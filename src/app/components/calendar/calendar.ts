@@ -18,7 +18,7 @@ import {
 } from '../../services/schedule.service';
 import { ScheduleDialog, ConfirmDialog } from '../dialogs';
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
 interface TourStep {
@@ -1111,7 +1111,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   readonly weekRangeLabel = computed(() => {
     const start = this.currentWeekStart();
     const end = new Date(start);
-    end.setDate(start.getDate() + 5); // Saturday is +5
+    end.setDate(start.getDate() + 6); // Sunday is +6
     
     const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
     return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
